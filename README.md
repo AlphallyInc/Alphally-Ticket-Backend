@@ -2,4 +2,4 @@
 [![Coverage Status](https://coveralls.io/repos/github/web-raiders/Tracypal-backend/badge.svg?branch=develop)](https://coveralls.io/github/web-raiders/Tracypal-backend?branch=develop) -->
 
 # Tracy-backend
-Backend for Tracey. An Application to help people learn and share Sex Experience.
+Backend for Alphally. An Application to sell MOvies and Event Tickets.
