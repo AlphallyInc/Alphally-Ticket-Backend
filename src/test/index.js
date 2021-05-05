@@ -3,7 +3,7 @@ import chai from 'chai';
 const { expect } = chai;
 
 describe('Initial test', () => {
-  it('should be equal to alphally-backend', () => {
-    expect('alphally-backend').to.equal('alphally-backend');
+  it('should be equal to tracey-backend', () => {
+    expect('tracey-backend').to.equal('tracey-backend');
   });
 });

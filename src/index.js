@@ -7,7 +7,7 @@ import morgan from 'morgan';
 import methodOverride from 'method-override';
 import cookieParser from 'cookie-parser';
 import env from './config/env';
-// import routes from './routes';
+import routes from './routes';
 
 const production = env.NODE_ENV === 'production';
 
@@ -31,7 +31,7 @@ if (!production) {
 }
 
 // connect app to routes
-// app.use('/v1.0/api', routes);
+app.use('/v1.0/api', routes);
 
 // / catch 404 and forward to error handler
 app.use((req, res, next) => {
@@ -43,6 +43,7 @@ app.use((req, res, next) => {
 // development error handler
 if (!production) {
   app.use((err, req, res, next) => {
+    // eslint-disable-next-line no-console
     console.log(err.stack);
     res.status(err.status || 500);
     res.json({
@@ -55,9 +56,9 @@ if (!production) {
 }
 
 // routes
-app.use(routes);
+// app.use(routes);
 app.get('/', (req, res) => res.status(200).send({
-  message: 'Welcome to WhoisinJail',
+  message: 'Welcome to Alphally Backend',
 }));
 app.all('*', (req, res) => res.send({ message: 'route not found' }));
 
