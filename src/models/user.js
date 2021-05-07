@@ -2,15 +2,23 @@ module.exports = (sequelize, DataTypes) => {
   const User = sequelize.define(
     'User',
     {
-      firstName: {
-        type: DataTypes.STRING,
-        allowNull: true
-      },
-      lastName: {
+      name: {
         type: DataTypes.STRING,
         allowNull: true
       },
       username: {
+        type: DataTypes.STRING,
+        allowNull: true
+      },
+      imageUrl: {
+        type: DataTypes.STRING,
+        allowNull: true
+      },
+      gender: {
+        type: DataTypes.STRING,
+        allowNull: true
+      },
+      dob: {
         type: DataTypes.STRING,
         allowNull: true
       },
@@ -23,17 +31,31 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: true,
         isEmail: true,
       },
+      referrerId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+          model: 'User',
+          key: 'id'
+        },
+      },
       phoneNumber: {
         type: DataTypes.STRING,
         allowNull: false
       },
-      dob: {
-        type: DataTypes.STRING,
-        allowNull: false
-      },
-      imageUrl: {
+      referralCode: {
         type: DataTypes.STRING,
         allowNull: true
+      },
+      verificationId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+          model: 'Verification',
+          key: 'id'
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
       },
     },
     {}

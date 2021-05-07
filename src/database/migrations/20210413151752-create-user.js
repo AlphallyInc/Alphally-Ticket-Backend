@@ -6,11 +6,7 @@ module.exports = {
       primaryKey: true,
       type: Sequelize.INTEGER
     },
-    firstName: {
-      type: Sequelize.STRING,
-      allowNull: true
-    },
-    lastName: {
+    name: {
       type: Sequelize.STRING,
       allowNull: true
     },
@@ -22,22 +18,48 @@ module.exports = {
       type: Sequelize.STRING,
       allowNull: true
     },
+    imageUrl: {
+      type: Sequelize.STRING,
+      allowNull: true
+    },
+    gender: {
+      type: Sequelize.STRING,
+      allowNull: true
+    },
+    dob: {
+      type: Sequelize.STRING,
+      allowNull: true
+    },
     email: {
       type: Sequelize.STRING,
       allowNull: true,
       isEmail: true,
     },
+    referrerId: {
+      type: Sequelize.INTEGER,
+      allowNull: true,
+      references: {
+        model: 'Users',
+        key: 'id'
+      },
+    },
     phoneNumber: {
       type: Sequelize.STRING,
       allowNull: false
     },
-    dob: {
-      type: Sequelize.STRING,
-      allowNull: false
-    },
-    imageUrl: {
+    referralCode: {
       type: Sequelize.STRING,
       allowNull: true
+    },
+    verificationId: {
+      type: Sequelize.INTEGER,
+      allowNull: false,
+      references: {
+        model: 'Verifications',
+        key: 'id'
+      },
+      onUpdate: 'CASCADE',
+      onDelete: 'CASCADE'
     },
     createdAt: {
       allowNull: false,
