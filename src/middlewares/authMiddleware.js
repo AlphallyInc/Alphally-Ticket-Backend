@@ -15,7 +15,9 @@ const {
   validateName,
   validatePassword,
   validateToken,
-  validateNickName
+  validateUsername,
+  validateDOB,
+  validateGender
 } = AuthValidation;
 const {
   findByKey
@@ -101,7 +103,7 @@ const AuthMiddleware = {
   async verifySignup(req, res, next) {
     try {
       const {
-        name, email, password, phoneNumber
+        name, email, password, phoneNumber, username
       } = req.body;
       validateName({ name });
       validateEmail({ email });
@@ -110,6 +112,8 @@ const AuthMiddleware = {
       const verification = await findByKey(Verification, { phoneNumber });
       if (!verification) return errorResponse(res, { code: 409, message: 'User is not verified!' });
       if (!verification.verified) return errorResponse(res, { code: 409, message: 'User is Not Yet verified!' });
+      const usernameUser = await findByKey(User, { username });
+      if (usernameUser) return errorResponse(res, { code: 409, message: 'This username is use by another user' });
       req.verification = verification;
       next();
     } catch (error) {
@@ -173,13 +177,15 @@ const AuthMiddleware = {
   async verifyProfile(req, res, next) {
     try {
       const {
-        name, email, oldPassword, nickname, newPassword
+        name, email, oldPassword, newPassword, dob, username, gender
       } = req.body;
       if (name) validateName({ name });
       if (email) validateEmail({ email });
       if (oldPassword) validatePassword({ password: oldPassword });
       if (newPassword) validatePassword({ password: newPassword });
-      if (nickname) validateNickName({ nickname });
+      if (username) validateUsername({ username });
+      if (dob) validateDOB({ dob });
+      if (gender) validateGender({ gender });
       next();
     } catch (error) {
       errorResponse(res, { code: 400, message: error });

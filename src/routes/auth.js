@@ -2,6 +2,7 @@
 import { Router } from 'express';
 import { AuthMiddleware } from '../middlewares';
 import { AuthController } from '../controller';
+import upload from '../middlewares/uploadMiddleware';
 
 const router = Router();
 const {
@@ -32,7 +33,7 @@ router.post('/verifyToken', validateTokenValue, verifyToken);
 router.post('/resendToken', verifyNumber, resendToken);
 router.post('/signup', verifySignup, signup);
 router.post('/login', verifyLogin, login);
-router.patch('/updateProfile', authenticate, verifyProfile, updateProfile);
+router.patch('/updateProfile', authenticate, upload.single('file'), verifyProfile, updateProfile);
 router.post('/forgetPassword', verifyNumber, forgetPassword);
 router.post('/verifyPasswordToken', validateTokenValue, verifyForgetPasswordLink);
 router.post('/setPassword', authenticate, verifyPasswordReset, setPassword);

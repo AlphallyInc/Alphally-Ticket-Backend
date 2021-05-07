@@ -1,10 +1,11 @@
+/* eslint-disable camelcase */
 /* eslint-disable no-empty-pattern */
 import { verifyPhoneNumber } from 'nigerian-phone-number-validator';
 import { GeneralService } from '../services';
-import { Toolbox, SMSLIER } from '../utils';
+import { Toolbox, SMSLIER, FileUpload } from '../utils';
 import { AuthValidation } from '../validation';
 import database from '../models';
-import env from '../config/env';
+// import env from '../config/env';
 
 const {
   successResponse,
@@ -22,6 +23,9 @@ const {
   // sendVerificationToken
 } = SMSLIER;
 const {
+  uploadImages
+} = FileUpload;
+const {
   addEntity,
   updateByKey,
   findByKey
@@ -30,9 +34,9 @@ const {
   User,
   Verification
 } = database;
-const {
-  CLIENT_URL
-} = env;
+// const {
+//   CLIENT_URL
+// } = env;
 
 const AuthController = {
   /**
@@ -190,6 +194,8 @@ const AuthController = {
   async updateProfile(req, res) {
     try {
       let body;
+      let imageUrl;
+      let usernames;
       const { id } = req.tokenData;
       if (req.body.oldPassword) {
         const currentUserDetails = await findByKey(User, { id });
@@ -198,7 +204,14 @@ const AuthController = {
         body = { ...req.body, password: hashPassword(newPassword) };
         delete body.oldPassword;
         delete body.newPassword;
-      } else body = { ...req.body };
+      } else {
+        if (req.body.username) {
+          usernames = await findByKey(User, { username: req.body.username });
+          if (usernames && usernames.id !== id) return errorResponse(res, { code: 409, message: 'This Username is use by another user' });
+        }
+        if (req.file) imageUrl = await uploadImages(req.file, '', 'profile_pic', 'profile_pictures');
+        body = { ...req.body, imageUrl };
+      }
       const user = await updateByKey(User, body, { id });
       successResponse(res, { message: 'Profile update was successful', user });
     } catch (error) {

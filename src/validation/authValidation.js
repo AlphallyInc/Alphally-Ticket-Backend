@@ -75,9 +75,41 @@ const AuthValidation = {
    * @returns {object | boolean} - returns a boolean or an error object
    * @memberof AuthValidation
    */
-   validateNickName(payload) {
+  validateUsername(payload) {
     const schema = {
-      nickname: joi.string().required().label('Please add a valid nick name')
+      username: joi.string().required().label('Please add a valid username')
+    };
+    const { error } = joi.validate({ ...payload }, schema);
+    if (error) throw error.details[0].context.label;
+    return true;
+  },
+
+  /**
+   * validate nick name
+   * @function
+   * @param {object} payload - user object
+   * @returns {object | boolean} - returns a boolean or an error object
+   * @memberof AuthValidation
+   */
+  validateDOB(payload) {
+    const schema = {
+      dob: joi.string().required().label('Please add a valid date of birth')
+    };
+    const { error } = joi.validate({ ...payload }, schema);
+    if (error) throw error.details[0].context.label;
+    return true;
+  },
+
+  /**
+   * validate nick name
+   * @function
+   * @param {object} payload - user object
+   * @returns {object | boolean} - returns a boolean or an error object
+   * @memberof AuthValidation
+   */
+  validateGender(payload) {
+    const schema = {
+      gender: joi.string().required().valid('male', 'female', 'MALE', 'FEMALE', 'Male', 'Female').label('Please add a valid gender')
     };
     const { error } = joi.validate({ ...payload }, schema);
     if (error) throw error.details[0].context.label;
