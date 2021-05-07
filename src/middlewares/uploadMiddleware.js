@@ -1,9 +1,5 @@
 import multer from 'multer';
-import { Toolbox } from '../utils';
-
-const {
-  errorResponse,
-} = Toolbox;
+import { ApiError } from '../utils';
 
 const upload = multer({
   limits: {
@@ -12,10 +8,11 @@ const upload = multer({
 
   fileFilter(req, file, cb) {
     if (!file.originalname.match(/\.(jpg|jpeg|png|svg|PNG|JFIF|jfif|SVG|JPEG)$/)) {
-      return errorResponse(404, 'File is not a valid');
+      throw new ApiError(400, 'File is not a valid');
     }
 
     cb(undefined, true);
   }
 });
+
 export default upload;
