@@ -30,6 +30,19 @@ module.exports = {
       type: Sequelize.STRING,
       allowNull: true
     },
+    companyName: {
+      type: Sequelize.STRING,
+      allowNull: true
+    },
+    companyAddress: {
+      type: Sequelize.STRING,
+      allowNull: true
+    },
+    role: {
+      type: Sequelize.ENUM('admin', 'user', 'super_admin', 'business', 'eventmanager', 'cinemamanager', 'ticketManager'),
+      allowNull: false,
+      defaultValue: 'user'
+    },
     email: {
       type: Sequelize.STRING,
       allowNull: true,
