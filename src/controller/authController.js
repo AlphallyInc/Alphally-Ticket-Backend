@@ -133,13 +133,9 @@ const AuthController = {
         if (!refferalUser) return errorResponse(res, { code: 409, message: 'Referal does not exist' });
       }
       const { verification } = req;
-      const {
-        name, email, phoneNumber, password
-      } = req.body;
+      const { password } = req.body;
       const body = {
-        name,
-        email,
-        phoneNumber,
+        ...req.body,
         password: hashPassword(password),
         referrerId: refferalUser !== null ? refferalUser.id : refferalUser,
         verificationId: verification.id
@@ -149,7 +145,9 @@ const AuthController = {
         email: user.email,
         id: user.id,
         phoneNumber: user.phoneNumber,
-        name: user.name
+        name: user.name,
+        role: user.role,
+        username: user.username
       });
       res.cookie('token', token, { maxAge: 70000000, httpOnly: true });
       return successResponse(res, { token }, 201);
@@ -175,7 +173,9 @@ const AuthController = {
         email: user.email,
         id: user.id,
         phoneNumber: user.phoneNumber,
-        name: user.name
+        name: user.name,
+        role: user.role,
+        username: user.username
       });
       res.cookie('token', user.token, { maxAge: 70000000, httpOnly: true });
       return successResponse(res, { message: 'Login Successful', token });
