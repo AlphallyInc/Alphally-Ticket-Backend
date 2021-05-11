@@ -1,33 +1,13 @@
 /* eslint-disable import/extensions */
 import { Router } from 'express';
 import { Bouncers } from '../middlewares';
-import { AuthController } from '../controller';
-import upload from '../middlewares/uploadMiddleware';
+// import { AuthController } from '../controller';
 
 const router = Router();
 const {
-  verifyNumber,
-  verifyUser,
-  verifySignup,
-  verifyLogin,
-  validateTokenValue,
-  authenticate,
-  verifyProfile,
-  verifyPasswordReset
-} = AuthMiddleware;
-const {
-  registerPhoneNumber,
-  verifyToken,
-  resendToken,
-  signup,
-  login,
-  updateProfile,
-  forgetPassword,
-  verifyForgetPasswordLink,
-  setPassword,
-  logoutUser
-} = AuthController;
+  userBouncers
+} = Bouncers;
 
-router.post('/follow-user', Auth, followUser); // ?user_uuid=[]
+router.post('/follow-user', userBouncers); // ?userId=[]&followerId=[]
 
 export default router;
