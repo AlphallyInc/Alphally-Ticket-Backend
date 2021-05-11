@@ -114,6 +114,8 @@ const AuthMiddleware = {
       if (!verification.verified) return errorResponse(res, { code: 409, message: 'User is Not Yet verified!' });
       const usernameUser = await findByKey(User, { username });
       if (usernameUser) return errorResponse(res, { code: 409, message: 'This username is use by another user' });
+      const phoneNumberUser = await findByKey(User, { phoneNumber });
+      if (phoneNumberUser) return errorResponse(res, { code: 409, message: 'This phone number is use by another user' });
       req.verification = verification;
       next();
     } catch (error) {
@@ -134,8 +136,6 @@ const AuthMiddleware = {
     try {
       const { password, phoneNumberOrUsername } = req.body;
       validatePassword({ password });
-      // eslint-disable-next-line max-len
-      // if (!verifyPhoneNumber(phoneNumber)) return errorResponse(res, { code: 400, message: 'Phone Number is Invalid' });
       let user = await findByKey(User, { phoneNumber: phoneNumberOrUsername });
       if (!user) user = await findByKey(User, { username: phoneNumberOrUsername });
       if (!user) return errorResponse(res, { code: 409, message: 'Your details are either incorrect or invalid' });

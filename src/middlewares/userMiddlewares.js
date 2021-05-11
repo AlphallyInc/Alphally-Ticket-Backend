@@ -28,14 +28,10 @@ const UserMiddleware = {
    */
   async verifyUserAndFollower(req, res, next) {
     try {
-      const { userId, followerId } = req.query;
-      if (userId) {
-        validateId({ id: userId });
-        const user = await findByKey(User, { id: userId });
-        if (!user) return errorResponse(res, { code: 409, message: 'User does not exist' });
-      }
+      const { followerId } = req.query;
       if (followerId) {
         validateId({ id: followerId });
+        if (req.tokenData.id === Number(followerId)) return errorResponse(res, { code: 409, message: 'You cannot follow yourself' });
         const follower = await findByKey(User, { id: followerId });
         if (!follower) return errorResponse(res, { code: 409, message: 'Follower does not exist' });
       }

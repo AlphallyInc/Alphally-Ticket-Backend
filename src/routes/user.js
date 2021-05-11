@@ -1,13 +1,19 @@
 /* eslint-disable import/extensions */
 import { Router } from 'express';
-import { Bouncers } from '../middlewares';
-// import { AuthController } from '../controller';
+import { Bouncers, UserMiddleware } from '../middlewares';
+import { UserController } from '../controller';
 
 const router = Router();
 const {
   userBouncers
 } = Bouncers;
+const {
+  verifyUserAndFollower
+} = UserMiddleware;
+const {
+  followOrUnFollowUser
+} = UserController;
 
-router.post('/follow-user', userBouncers); // ?userId=[]&followerId=[]
+router.post('/follow-or-unfollow', userBouncers, verifyUserAndFollower, followOrUnFollowUser); // ?userId=[]&followerId=[]
 
 export default router;
