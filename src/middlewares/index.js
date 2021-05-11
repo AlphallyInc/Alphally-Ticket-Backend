@@ -1,6 +1,7 @@
 import AuthMiddleware from './authMiddleware';
+import Bouncers from './bouncers';
 
 export {
-  // eslint-disable-next-line import/prefer-default-export
+  Bouncers,
   AuthMiddleware,
 };
