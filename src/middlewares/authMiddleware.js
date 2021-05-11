@@ -132,11 +132,13 @@ const AuthMiddleware = {
    */
   async verifyLogin(req, res, next) {
     try {
-      const { password, phoneNumber } = req.body;
+      const { password, phoneNumberOrUsername } = req.body;
       validatePassword({ password });
-      if (!verifyPhoneNumber(phoneNumber)) return errorResponse(res, { code: 400, message: 'Phone Number is Invalid' });
-      const user = await findByKey(User, { phoneNumber });
-      if (!user) return errorResponse(res, { code: 409, message: 'Incorrect Phone Number or Password' });
+      // eslint-disable-next-line max-len
+      // if (!verifyPhoneNumber(phoneNumber)) return errorResponse(res, { code: 400, message: 'Phone Number is Invalid' });
+      let user = await findByKey(User, { phoneNumber: phoneNumberOrUsername });
+      if (!user) user = await findByKey(User, { username: phoneNumberOrUsername });
+      if (!user) return errorResponse(res, { code: 409, message: 'Your details are either incorrect or invalid' });
       req.user = user;
       next();
     } catch (error) {
