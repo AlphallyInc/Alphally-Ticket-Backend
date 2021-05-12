@@ -78,6 +78,10 @@ module.exports = (sequelize, DataTypes) => {
       as: 'verification',
       foreignKey: 'verificationId'
     });
+    User.hasMany(models.Follower, {
+      as: 'follower',
+      foreignKey: 'followerId'
+    });
   };
   return User;
 };

@@ -1,6 +1,7 @@
-/* eslint-disable import/prefer-default-export */
 import GeneralService from './generalService';
+import UserService from './userService';
 
 export {
-  GeneralService
+  GeneralService,
+  UserService
 };
