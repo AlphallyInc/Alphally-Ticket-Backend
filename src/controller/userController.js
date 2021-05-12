@@ -105,6 +105,26 @@ const UserController = {
     } catch (error) {
       errorResponse(res, { code: 500, message: error });
     }
+  },
+
+  /**
+   * list followers
+   * @async
+   * @param {object} req
+   * @param {object} res
+   * @returns {JSON} a JSON response with user details and Token
+   * @memberof UserController
+   */
+  async listFollowers(req, res) {
+    try {
+      const { id } = req.tokenData;
+      const followers = await rowCountByKey(Follower, { followerId: id });
+      followers.followData = followers.rows;
+      delete followers.rows;
+      return successResponse(res, { message: 'Followers Gotten Successfully', followers });
+    } catch (error) {
+      errorResponse(res, { code: 500, message: error });
+    }
   }
 };
 
