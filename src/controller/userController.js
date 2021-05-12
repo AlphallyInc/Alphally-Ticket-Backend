@@ -67,6 +67,44 @@ const UserController = {
     } catch (error) {
       errorResponse(res, { code: 500, message: error });
     }
+  },
+
+  /**
+   * check if you are following user
+   * @async
+   * @param {object} req
+   * @param {object} res
+   * @returns {JSON} a JSON response with user details and Token
+   * @memberof UserController
+   */
+  async checkFollowing(req, res) {
+    try {
+      const { id } = req.tokenData;
+      const user = await findByKey(Follower, { userId: id, followerId: req.query.userId });
+      const following = !!user;
+      return successResponse(res, { following });
+    } catch (error) {
+      errorResponse(res, { code: 500, message: error });
+    }
+  },
+
+  /**
+   * check if user is following
+   * @async
+   * @param {object} req
+   * @param {object} res
+   * @returns {JSON} a JSON response with user details and Token
+   * @memberof UserController
+   */
+  async checkFollower(req, res) {
+    try {
+      const { id } = req.tokenData;
+      const user = await findByKey(Follower, { userId: req.query.userId, followerId: id });
+      const follower = !!user;
+      return successResponse(res, { follower });
+    } catch (error) {
+      errorResponse(res, { code: 500, message: error });
+    }
   }
 };
 

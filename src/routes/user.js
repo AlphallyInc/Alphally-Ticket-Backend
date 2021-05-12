@@ -12,10 +12,14 @@ const {
 } = UserMiddleware;
 const {
   followOrUnFollowUser,
-  getProfile
+  getProfile,
+  checkFollowing,
+  checkFollower
 } = UserController;
 
 router.post('/follow-or-unfollow', userBouncers, verifyUserAndFollower, followOrUnFollowUser); // ?userId=[]&followerId=[]
 router.get('/profile', userBouncers, getProfile);
+router.get('/check-if-following', userBouncers, checkFollowing); // userId=[]
+router.get('/check-if-follower', userBouncers, checkFollower); // userId=[]
 
 export default router;
