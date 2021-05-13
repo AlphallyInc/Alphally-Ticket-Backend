@@ -150,8 +150,8 @@ export default class Toolbox {
    * @memberof Toolbox
    */
   static generateOTP() {
-    const randomNumber = Math.floor(Math.random() * 899 + 100);
-    const anotherRandomNumber = Math.floor(Math.random() * 8999 + 1000);
+    const randomNumber = Math.floor(Math.random() * 89 + 99);
+    const anotherRandomNumber = Math.floor(Math.random() * 79 + 10);
     const reference = `${randomNumber}${anotherRandomNumber}`;
     return reference;
   }
@@ -164,8 +164,8 @@ export default class Toolbox {
    * @memberof Toolbox
    */
   static generateReffalCode(name) {
-    const randomNumber = Math.floor(Math.random() * 899 + 100);
-    const anotherRandomNumber = Math.floor(Math.random() * 899 + 100);
+    const randomNumber = Math.floor(Math.random() * 89 + 99);
+    const anotherRandomNumber = Math.floor(Math.random() * 79 + 10);
     const reference = `ref_${name}${randomNumber}${anotherRandomNumber}`;
     return reference;
   }

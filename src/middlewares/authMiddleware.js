@@ -17,7 +17,8 @@ const {
   validateToken,
   validateUsername,
   validateDOB,
-  validateGender
+  validateGender,
+  validateRole
 } = AuthValidation;
 const {
   findByKey
@@ -103,11 +104,12 @@ const AuthMiddleware = {
   async verifySignup(req, res, next) {
     try {
       const {
-        name, email, password, phoneNumber, username
+        name, email, password, phoneNumber, username, role
       } = req.body;
       validateName({ name });
       validateEmail({ email });
       validatePassword({ password });
+      validateRole({ role });
       if (!verifyPhoneNumber(phoneNumber)) return errorResponse(res, { code: 400, message: 'Phone Number is Invalid' });
       const verification = await findByKey(Verification, { phoneNumber });
       if (!verification) return errorResponse(res, { code: 409, message: 'User is not verified!' });

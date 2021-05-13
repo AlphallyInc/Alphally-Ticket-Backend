@@ -117,6 +117,22 @@ const AuthValidation = {
   },
 
   /**
+   * validate ROLE
+   * @function
+   * @param {object} payload - user object
+   * @returns {object | boolean} - returns a boolean or an error object
+   * @memberof AuthValidation
+   */
+  validateRole(payload) {
+    const schema = {
+      role: joi.string().required().valid('admin', 'user', 'super_admin', 'business', 'eventmanager', 'cinemamanager', 'ticketManager').label('Please add a valid role')
+    };
+    const { error } = joi.validate({ ...payload }, schema);
+    if (error) throw error.details[0].context.label;
+    return true;
+  },
+
+  /**
    * validate password
    * @function
    * @param {object} payload - user object

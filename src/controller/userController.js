@@ -1,4 +1,4 @@
-import { GeneralService, UserService } from '../services';
+import { GeneralService } from '../services';
 import { Toolbox } from '../utils';
 import database from '../models';
 
