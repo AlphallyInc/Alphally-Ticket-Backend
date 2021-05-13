@@ -1,7 +1,7 @@
 {
   "name": "alphally-backend",
   "version": "1.0.0",
-  "description": "This is a private directory for movies and events sales",
+  "description": "This is a private directory for movies and events ticket sales",
   "main": "index.js",
   "scripts": {
     "lint": "eslint ./src --fix",
