@@ -9,11 +9,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: true
     },
   }, {});
-  Privacy.associate = (models) => {
-    // Privacy.hasOne(models.User, {
-    //   as: 'user',
-    //   foreignKey: 'PrivacyId'
-    // });
+  Privacy.associate = () => {
   };
   return Privacy;
 };

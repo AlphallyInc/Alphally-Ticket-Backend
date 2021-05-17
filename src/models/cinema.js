@@ -21,7 +21,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: true
     },
   }, {});
-  Cinema.associate = (models) => {
+  Cinema.associate = () => {
   };
   return Cinema;
 };
