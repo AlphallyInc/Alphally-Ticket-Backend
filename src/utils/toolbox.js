@@ -150,9 +150,10 @@ export default class Toolbox {
    * @memberof Toolbox
    */
   static generateOTP() {
-    const randomNumber = Math.floor(Math.random() * 89 + 99);
+    const randomNumber = Math.floor(Math.random() * 69 + 39);
     const anotherRandomNumber = Math.floor(Math.random() * 79 + 10);
-    const reference = `${randomNumber}${anotherRandomNumber}`;
+    let reference = `${randomNumber}${anotherRandomNumber}`;
+    if (reference.toString().length > 4) reference = reference.slice(0, 4);
     return reference;
   }
 
