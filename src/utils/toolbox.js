@@ -140,7 +140,7 @@ export default class Toolbox {
       bearerToken = authorization.split(' ')[1]
         ? authorization.split(' ')[1] : authorization;
     }
-    return cookieToken || bearerToken || req.headers['x-access-token'] || req.headers.token || req.body.token;
+    return bearerToken || cookieToken || req.headers['x-access-token'] || req.headers.token || req.body.token;
   }
 
   /**

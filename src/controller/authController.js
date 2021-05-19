@@ -177,7 +177,7 @@ const AuthController = {
         role: user.role,
         username: user.username
       });
-      res.cookie('token', user.token, { maxAge: 70000000, httpOnly: true });
+      res.cookie('token', token, { maxAge: 70000000, httpOnly: true });
       return successResponse(res, { message: 'Login Successful', token });
     } catch (error) {
       errorResponse(res, { code: 500, message: error });

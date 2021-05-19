@@ -35,6 +35,22 @@ const GeneralValidation = {
     return true;
   },
 
+  /**
+   * validate privacy payload
+   * @param {object} payload - user object
+   * @returns {object | boolean} - returns a boolean or an error object
+   * @memberof GeneralValidation
+   */
+  validatePrivacy(payload) {
+    const schema = {
+      type: joi.string().required().label('Please a valid privacy type'),
+      description: joi.string().label('Please a valid privacy description'),
+    };
+    const { error } = joi.validate({ ...payload }, schema);
+    if (error) throw error.details[0].context.label;
+    return true;
+  },
+
 };
 
 export default GeneralValidation;
