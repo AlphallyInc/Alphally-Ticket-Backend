@@ -84,10 +84,10 @@ const PostController = {
       let postData;
       const { id, isPublished } = req.query;
       if (id) [postData] = await getPostByKey({ id: req.query.id });
-      else postData = await getPostByKey({ isPublished });
+      else if (isPublished) postData = await getPostByKey({ isPublished });
+      else postData = await getPostByKey({});
       return successResponse(res, { message: 'Post Gotten Successfully', postData });
     } catch (error) {
-      console.error(error);
       errorResponse(res, { code: 500, message: error });
     }
   },

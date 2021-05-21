@@ -47,9 +47,11 @@ const PostMiddleware = {
    */
   async verifyPostID(req, res, next) {
     try {
-      validateId({ id: req.query.id });
-      const post = await findByKey(Post, { id: req.query.id });
-      if (!post) return errorResponse(res, { code: 404, message: 'Post is Not Found' });
+      if (req.query.id) {
+        validateId({ id: req.query.id });
+        const post = await findByKey(Post, { id: req.query.id });
+        if (!post) return errorResponse(res, { code: 404, message: 'Post is Not Found' });
+      }
       next();
     } catch (error) {
       errorResponse(res, { code: 400, message: error });
