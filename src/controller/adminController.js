@@ -70,7 +70,7 @@ const AdminController = {
     } catch (error) {
       errorResponse(res, { code: 500, message: error });
     }
-  }
+  },
 };
 
 export default AdminController;

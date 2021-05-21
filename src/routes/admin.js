@@ -5,7 +5,7 @@ import { AdminController } from '../controller';
 
 const router = Router();
 const {
-  adminBouncers
+  adminBouncers,
 } = Bouncers;
 const {
   verifyPrivacy
@@ -13,7 +13,7 @@ const {
 const {
   addPrivacyAll,
   addPrivacy,
-  deletePrivacy
+  deletePrivacy,
 } = AdminController;
 
 router.post('/privacy/all', adminBouncers, addPrivacyAll);

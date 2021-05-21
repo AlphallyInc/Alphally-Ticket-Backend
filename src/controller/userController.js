@@ -10,14 +10,16 @@ const {
   addEntity,
   findByKey,
   deleteByKey,
-  rowCountByKey
+  rowCountByKey,
+  allEntities
 } = GeneralService;
 // const {
 //   getUserProfile
 // } = UserService;
 const {
   User,
-  Follower
+  Follower,
+  Privacy
 } = database;
 
 const UserController = {
@@ -122,6 +124,24 @@ const UserController = {
       followers.followData = followers.rows;
       delete followers.rows;
       return successResponse(res, { message: 'Followers Gotten Successfully', followers });
+    } catch (error) {
+      errorResponse(res, { code: 500, message: error });
+    }
+  },
+
+  /**
+   * delete a single privacy account
+   * @async
+   * @param {object} req
+   * @param {object} res
+   * @returns {JSON} a JSON response with user details and Token
+   * @memberof AdminController
+   */
+  async getPrivacy(req, res) {
+    try {
+      const privacy = await allEntities(Privacy);
+      if (!privacy.length) return successResponse(res, { message: 'No Privacy Added Yet', privacy });
+      return successResponse(res, { message: 'Privacy Gotten Successfully', privacy });
     } catch (error) {
       errorResponse(res, { code: 500, message: error });
     }

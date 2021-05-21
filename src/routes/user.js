@@ -15,7 +15,8 @@ const {
   getProfile,
   checkFollowing,
   checkFollower,
-  listFollowers
+  listFollowers,
+  getPrivacy
 } = UserController;
 
 router.post('/follow-or-unfollow', userBouncers, verifyUserAndFollower, followOrUnFollowUser); // ?userId=[]&followerId=[]
@@ -23,5 +24,6 @@ router.get('/profile', userBouncers, getProfile);
 router.get('/check-if-following', userBouncers, checkFollowing); // userId=[]
 router.get('/check-if-follower', userBouncers, checkFollower); // userId=[]
 router.get('/list-followers', userBouncers, listFollowers);
+router.get('/privacy', userBouncers, getPrivacy);
 
 export default router;
