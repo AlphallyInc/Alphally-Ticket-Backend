@@ -192,10 +192,12 @@ export default class Toolbox {
       }) => {
         if (item.fileName === fileName) {
           result.push({
-            type, fileExtension, userId, fileName
+            type, fileExtension, userId, name: fileName, url: item.url
           });
         }
       });
     });
+
+    return result;
   }
 }

@@ -53,7 +53,7 @@ const FileUpload = {
       public_id: public_id !== '' ? `${folder}/${public_id}` : `${folder}/${uuidv4()}`,
       resource_type: 'video'
     });
-    return result.secure_url;
+    return { url: result.secure_url, fileName };
   },
 
   /**

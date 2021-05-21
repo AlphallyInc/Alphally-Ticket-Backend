@@ -19,7 +19,7 @@ const {
 const {
   Post,
   Media,
-  MediaPost
+  PostMedia
 } = database;
 
 const PostController = {
@@ -33,33 +33,37 @@ const PostController = {
    */
   async addPost(req, res) {
     try {
+      let mediaPayload;
+      let media;
       const { id } = req.tokenData;
       if (req.files.length) {
-        let mediaPayload = req.files.map((item) => ({
+        let imageMediaPayload;
+        let videoMediaPayload;
+        const fullMediaPayload = req.files.map((item) => ({
           type: item.mimetype.split('/')[0],
           fileExtension: item.mimetype.split('/')[1],
           userId: id,
-          fileName: item.originalName
+          fileName: item.originalname
         }));
-
         const imagePayload = req.files.filter((item) => item.mimetype.split('/')[0].toLowerCase() === 'image');
         const videoPayload = req.files.filter((item) => item.mimetype.split('/')[0].toLowerCase() === 'video');
-
         if (imagePayload.length > 0) {
           const imageUrls = await uploadAllImages(imagePayload);
-          mediaPayload = mergeImageVideoUrls(mediaPayload, imageUrls);
+          imageMediaPayload = mergeImageVideoUrls(fullMediaPayload, imageUrls);
         }
-        console.log(`I am a media ${mediaPayload}`);
         if (videoPayload.length > 0) {
           const videoUrls = await uploadAllVideos(videoPayload);
-          mediaPayload = mergeImageVideoUrls(mediaPayload, videoUrls);
+          videoMediaPayload = mergeImageVideoUrls(fullMediaPayload, videoUrls);
         }
-
-        return console.log(`I am a media ${mediaPayload}`);
+        mediaPayload = imageMediaPayload.concat(videoMediaPayload);
+        media = await Media.bulkCreate(mediaPayload);
       }
-      // console.log(imagePayload, videoPayload);
-      // const privacy = await Privacy.bulkCreate(req.body);
-      // return successResponse(res, { message: 'Privacy Added Successfully', privacy });
+      const post = await addEntity(Post, { ...req.body, userId: id });
+      const mediaPostPayload = media.map((item) => ({ mediaId: item.id, postId: post.id }));
+      const mediaPost = await PostMedia.bulkCreate(mediaPostPayload);
+      return successResponse(res, {
+        message: 'Post Added Successfully', post, media, mediaPost
+      });
     } catch (error) {
       console.error(error);
       errorResponse(res, { code: 500, message: error });
