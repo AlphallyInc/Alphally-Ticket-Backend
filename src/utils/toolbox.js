@@ -4,7 +4,12 @@ import bcrypt from 'bcryptjs';
 import joi from '@hapi/joi';
 import env from '../config/env';
 import ApiError from './apiError';
+import FileUpload from './fileUpload';
 
+const {
+  uploadVideo,
+  uploadImages
+} = FileUpload;
 const { SECRET } = env;
 
 /**
@@ -140,7 +145,7 @@ export default class Toolbox {
       bearerToken = authorization.split(' ')[1]
         ? authorization.split(' ')[1] : authorization;
     }
-    return cookieToken || bearerToken || req.headers['x-access-token'] || req.headers.token || req.body.token;
+    return bearerToken || cookieToken || req.headers['x-access-token'] || req.headers.token || req.body.token;
   }
 
   /**
@@ -150,9 +155,10 @@ export default class Toolbox {
    * @memberof Toolbox
    */
   static generateOTP() {
-    const randomNumber = Math.floor(Math.random() * 89 + 99);
+    const randomNumber = Math.floor(Math.random() * 69 + 39);
     const anotherRandomNumber = Math.floor(Math.random() * 79 + 10);
-    const reference = `${randomNumber}${anotherRandomNumber}`;
+    let reference = `${randomNumber}${anotherRandomNumber}`;
+    if (reference.toString().length > 4) reference = reference.slice(0, 4);
     return reference;
   }
 
@@ -168,5 +174,30 @@ export default class Toolbox {
     const anotherRandomNumber = Math.floor(Math.random() * 79 + 10);
     const reference = `ref_${name}${randomNumber}${anotherRandomNumber}`;
     return reference;
+  }
+
+  /**
+   * upload video by recursion
+   * @static
+   * @param {array} mediaPayload - array of images to be uploaded
+   * @param {array} mediaUrls - array of images to be uploaded
+   * @returns {array} url - array of images urls uploaded
+   * @memberof Toolbox
+   */
+  static mergeImageVideoUrls(mediaPayload, mediaUrls) {
+    const result = [];
+    mediaUrls.forEach((item) => {
+      mediaPayload.forEach(({
+        type, fileExtension, userId, fileName
+      }) => {
+        if (item.fileName === fileName) {
+          result.push({
+            type, fileExtension, userId, name: fileName, url: item.url
+          });
+        }
+      });
+    });
+
+    return result;
   }
 }

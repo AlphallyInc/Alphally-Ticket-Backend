@@ -27,7 +27,7 @@ const AuthValidation = {
    */
   validateToken(payload) {
     const schema = {
-      token: joi.string().min(7).required()
+      token: joi.string().min(4).required()
         .label('Please input a valid token number'),
     };
     const { error } = joi.validate({ ...payload }, schema);
