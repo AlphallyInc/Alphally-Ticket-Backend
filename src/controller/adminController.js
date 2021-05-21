@@ -64,7 +64,7 @@ const AdminController = {
   async deletePrivacy(req, res) {
     try {
       const privacy = await findByKey(Privacy, { id: req.query.id });
-      if (!privacy) return errorResponse(res, { code: 409, message: 'Privacy Type does not exist' });
+      if (!privacy) return errorResponse(res, { code: 404, message: 'Privacy Type does not exist' });
       await deleteByKey(Privacy, { id: req.query.id });
       return successResponse(res, { message: 'Privacy Deleted Successfully' });
     } catch (error) {

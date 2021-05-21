@@ -31,7 +31,16 @@ module.exports = (sequelize, DataTypes) => {
       onDelete: 'CASCADE'
     }
   }, {});
-  Media.associate = () => {
+  Media.associate = (models) => {
+    Media.belongsToMany(models.Post, {
+      through: 'PostMedia',
+      as: 'post',
+      foreignKey: 'postId'
+    });
+    Media.hasMany(models.PostMedia, {
+      as: 'posts',
+      foreignKey: 'mediaId'
+    });
   };
   return Media;
 };

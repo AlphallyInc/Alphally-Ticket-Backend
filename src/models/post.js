@@ -1,3 +1,5 @@
+const postMedia = require("./postMedia");
+
 module.exports = (sequelize, DataTypes) => {
   const Post = sequelize.define('Post', {
     title: {
@@ -66,7 +68,20 @@ module.exports = (sequelize, DataTypes) => {
       onDelete: 'CASCADE'
     },
   }, {});
-  Post.associate = () => {
+  Post.associate = (models) => {
+    Post.belongsTo(models.User, {
+      as: 'author',
+      foreignKey: 'userId'
+    });
+    Post.belongsToMany(models.Media, {
+      through: 'PostMedia',
+      as: 'media',
+      foreignKey: 'mediaId'
+    });
+    Post.hasMany(models.PostMedia, {
+      as: 'medias',
+      foreignKey: 'postId'
+    });
   };
   return Post;
 };

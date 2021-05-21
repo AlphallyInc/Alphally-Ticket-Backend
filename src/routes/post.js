@@ -9,12 +9,17 @@ const {
   userBouncers
 } = Bouncers;
 const {
-  verifyPost
+  verifyPost,
+  verifyPostID
 } = PostMiddleware;
 const {
-  addPost
+  addPost,
+  deletePost,
+  getPost
 } = PostController;
 
 router.post('/', userBouncers, upload.array('media'), verifyPost, addPost);
+router.delete('/', userBouncers, verifyPostID, deletePost); // ?id=[]
+router.get('/', userBouncers, verifyPostID, getPost); // ?id=[]&isPublished=[]
 
 export default router;

@@ -1,4 +1,4 @@
-import { GeneralService } from '../services';
+import { GeneralService, PostService } from '../services';
 import { Toolbox, Helpers } from '../utils';
 import database from '../models';
 
@@ -13,9 +13,11 @@ const {
 } = Helpers;
 const {
   addEntity,
-  findByKey,
   deleteByKey
 } = GeneralService;
+const {
+  getPostByKey
+} = PostService;
 const {
   Post,
   Media,
@@ -65,7 +67,44 @@ const PostController = {
         message: 'Post Added Successfully', post, media, mediaPost
       });
     } catch (error) {
+      errorResponse(res, { code: 500, message: error });
+    }
+  },
+
+  /**
+   * get posts
+   * @async
+   * @param {object} req
+   * @param {object} res
+   * @returns {JSON} a JSON response with user details and Token
+   * @memberof PostController
+   */
+  async getPost(req, res) {
+    try {
+      let postData;
+      const { id, isPublished } = req.query;
+      if (id) [postData] = await getPostByKey({ id: req.query.id });
+      else postData = await getPostByKey({ isPublished });
+      return successResponse(res, { message: 'Post Gotten Successfully', postData });
+    } catch (error) {
       console.error(error);
+      errorResponse(res, { code: 500, message: error });
+    }
+  },
+
+  /**
+   * delete a single privacy account
+   * @async
+   * @param {object} req
+   * @param {object} res
+   * @returns {JSON} a JSON response with user details and Token
+   * @memberof PostController
+   */
+  async deletePost(req, res) {
+    try {
+      await deleteByKey(Post, { id: req.query.id });
+      return successResponse(res, { message: 'Post Deleted Successfully' });
+    } catch (error) {
       errorResponse(res, { code: 500, message: error });
     }
   },
