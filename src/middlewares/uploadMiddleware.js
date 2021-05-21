@@ -7,7 +7,7 @@ const upload = multer({
   },
 
   fileFilter(req, file, cb) {
-    if (!file.originalname.match(/\.(jpg|jpeg|png|svg|PNG|JFIF|jfif|SVG|JPEG)$/)) {
+    if (!file.originalname.match(/\.(jpg|jpeg|png|svg|PNG|JFIF|jfif|SVG|JPEG|mp4|MP4)$/)) {
       throw new ApiError(400, 'File is not a valid');
     }
 

@@ -4,7 +4,12 @@ import bcrypt from 'bcryptjs';
 import joi from '@hapi/joi';
 import env from '../config/env';
 import ApiError from './apiError';
+import FileUpload from './fileUpload';
 
+const {
+  uploadVideo,
+  uploadImages
+} = FileUpload;
 const { SECRET } = env;
 
 /**
@@ -169,5 +174,28 @@ export default class Toolbox {
     const anotherRandomNumber = Math.floor(Math.random() * 79 + 10);
     const reference = `ref_${name}${randomNumber}${anotherRandomNumber}`;
     return reference;
+  }
+
+  /**
+   * upload video by recursion
+   * @static
+   * @param {array} mediaPayload - array of images to be uploaded
+   * @param {array} mediaUrls - array of images to be uploaded
+   * @returns {array} url - array of images urls uploaded
+   * @memberof Toolbox
+   */
+  static mergeImageVideoUrls(mediaPayload, mediaUrls) {
+    const result = [];
+    mediaUrls.forEach((item) => {
+      mediaPayload.forEach(({
+        type, fileExtension, userId, fileName
+      }) => {
+        if (item.fileName === fileName) {
+          result.push({
+            type, fileExtension, userId, fileName
+          });
+        }
+      });
+    });
   }
 }

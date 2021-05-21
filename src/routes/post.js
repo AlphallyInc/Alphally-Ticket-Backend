@@ -1,24 +1,20 @@
 /* eslint-disable import/extensions */
 import { Router } from 'express';
-import { Bouncers, UserMiddleware } from '../middlewares';
-import { UserController } from '../controller';
+import { Bouncers, PostMiddleware } from '../middlewares';
+import { PostController } from '../controller';
+import upload from '../middlewares/uploadMiddleware';
 
 const router = Router();
 const {
   userBouncers
 } = Bouncers;
-// const {
-//   verifyUserAndFollower
-// } = UserMiddleware;
-// const {
-//   followOrUnFollowUser,
-//   getProfile,
-//   checkFollowing,
-//   checkFollower,
-//   listFollowers
-// } = UserController;
+const {
+  verifyPost
+} = PostMiddleware;
+const {
+  addPost
+} = PostController;
 
-router.post('/', userBouncers); // ?userId=[]&followerId=[]
-
+router.post('/', userBouncers, upload.array('media'), verifyPost, addPost);
 
 export default router;
