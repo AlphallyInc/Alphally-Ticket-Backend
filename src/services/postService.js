@@ -3,7 +3,9 @@ import database from '../models';
 const {
   Post,
   User,
+  Like,
   Media,
+  Comment,
   PostMedia
 } = database;
 
@@ -22,7 +24,37 @@ const PostService = {
           {
             model: User,
             as: 'author',
-            attributes: ['id', 'name', 'username', 'imageUrl']
+            attributes: ['id', 'name', 'username', 'imageUrl'],
+          },
+          {
+            model: Like,
+            as: 'likes',
+            attributes: ['id']
+          },
+          {
+            model: Comment,
+            as: 'comments',
+            attributes: ['id', 'comment'],
+            where: { parentId: null },
+            include: [
+              {
+                model: User,
+                as: 'commenter',
+                attributes: ['id', 'name', 'username', 'imageUrl']
+              },
+              {
+                model: Comment,
+                as: 'replyComments',
+                attributes: ['id', 'comment'],
+                include: [
+                  {
+                    model: User,
+                    as: 'commenter',
+                    attributes: ['id', 'name', 'username', 'imageUrl']
+                  }
+                ]
+              },
+            ],
           },
           {
             model: PostMedia,
@@ -39,7 +71,8 @@ const PostService = {
         where: key,
         order: [
           ['id', 'DESC']
-        ]
+        ],
+        returning: true
       });
       return entities;
     } catch (error) {

@@ -35,7 +35,23 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false
     },
   }, {});
-  Comment.associate = () => {
+  Comment.associate = (models) => {
+    Comment.belongsTo(models.User, {
+      as: 'commenter',
+      foreignKey: 'userId'
+    });
+    Comment.belongsTo(models.Post, {
+      as: 'post',
+      foreignKey: 'postId'
+    });
+    Comment.hasMany(models.Comment, {
+      as: 'replyComments',
+      foreignKey: 'parentId'
+    });
+    Comment.belongsTo(models.Comment, {
+      as: 'replyComment',
+      foreignKey: 'parentId'
+    });
   };
   return Comment;
 };

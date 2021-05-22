@@ -86,9 +86,11 @@ const PostController = {
     try {
       let postData;
       const { id, isPublished } = req.query;
-      if (id) [postData] = await getPostByKey({ id: req.query.id });
+      if (id) postData = await getPostByKey({ id: req.query.id });
       else if (isPublished) postData = await getPostByKey({ isPublished });
       else postData = await getPostByKey({});
+      // eslint-disable-next-line max-len
+      postData = await postData.map((item) => ({ ...item.dataValues, likes: item.dataValues.likes.length }));
       return successResponse(res, { message: 'Post Gotten Successfully', postData });
     } catch (error) {
       errorResponse(res, { code: 500, message: error });
