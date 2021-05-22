@@ -177,7 +177,7 @@ const AuthController = {
         role: user.role,
         username: user.username
       });
-      res.cookie('token', user.token, { maxAge: 70000000, httpOnly: true });
+      res.cookie('token', token, { maxAge: 70000000, httpOnly: true });
       return successResponse(res, { message: 'Login Successful', token });
     } catch (error) {
       errorResponse(res, { code: 500, message: error });
@@ -209,8 +209,8 @@ const AuthController = {
           usernames = await findByKey(User, { username: req.body.username });
           if (usernames && usernames.id !== id) return errorResponse(res, { code: 409, message: 'This Username is use by another user' });
         }
-        if (req.file) imageUrl = await uploadImages(req.file, '', 'profile_pic', 'profile_pictures');
-        body = { ...req.body, imageUrl };
+        if (req.file) imageUrl = await uploadImages(req.file, req.file.originalName, 'profile_pic', 'profile_pictures');
+        body = { ...req.body, imageUrl: imageUrl !== '' ? imageUrl.url : '' };
       }
       const user = await updateByKey(User, body, { id });
       successResponse(res, { message: 'Profile update was successful', user });

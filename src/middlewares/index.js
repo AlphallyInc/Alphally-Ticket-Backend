@@ -1,6 +1,13 @@
 import AuthMiddleware from './authMiddleware';
+import UserMiddleware from './userMiddlewares';
+import AdminMiddleware from './adminMiddleware';
+import PostMiddleware from './postMiddlewares';
+import Bouncers from './bouncers';
 
 export {
-  // eslint-disable-next-line import/prefer-default-export
+  Bouncers,
   AuthMiddleware,
+  UserMiddleware,
+  AdminMiddleware,
+  PostMiddleware
 };

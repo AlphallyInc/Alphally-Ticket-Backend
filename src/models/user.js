@@ -31,7 +31,7 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: true
       },
       role: {
-        type: DataTypes.ENUM('admin', 'user', 'super_admin', 'business', 'eventmanager', 'cinemamanager', 'ticketManager'),
+        type: DataTypes.STRING,
         allowNull: false,
         defaultValue: 'user'
       },
@@ -77,6 +77,14 @@ module.exports = (sequelize, DataTypes) => {
     User.belongsTo(models.Verification, {
       as: 'verification',
       foreignKey: 'verificationId'
+    });
+    User.hasMany(models.Follower, {
+      as: 'follower',
+      foreignKey: 'followerId'
+    });
+    User.hasMany(models.Post, {
+      as: 'posts',
+      foreignKey: 'userId'
     });
   };
   return User;
