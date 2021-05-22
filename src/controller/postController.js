@@ -21,6 +21,7 @@ const {
 const {
   Post,
   Media,
+  Comment,
   PostMedia
 } = database;
 
@@ -105,6 +106,26 @@ const PostController = {
       await deleteByKey(Post, { id: req.query.id });
       return successResponse(res, { message: 'Post Deleted Successfully' });
     } catch (error) {
+      errorResponse(res, { code: 500, message: error });
+    }
+  },
+
+  /**
+   * comment on a single post
+   * @async
+   * @param {object} req
+   * @param {object} res
+   * @returns {JSON} a JSON response with user details and Token
+   * @memberof PostController
+   */
+  async addPostComment(req, res) {
+    try {
+      const { id } = req.tokenData;
+      const { postId } = req.query;
+      const comment = await addEntity(Comment, { ...req.body, postId, userId: id });
+      return successResponse(res, { message: 'Comment Added Successfully', comment });
+    } catch (error) {
+      console.error(error);
       errorResponse(res, { code: 500, message: error });
     }
   },

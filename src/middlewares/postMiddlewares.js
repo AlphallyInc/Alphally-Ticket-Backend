@@ -8,7 +8,8 @@ const {
 } = Toolbox;
 const {
   validatePost,
-  validateId
+  validateId,
+  validateComment
 } = GeneralValidation;
 const {
   findByKey
@@ -50,6 +51,12 @@ const PostMiddleware = {
       if (req.query.id) {
         validateId({ id: req.query.id });
         const post = await findByKey(Post, { id: req.query.id });
+        if (!post) return errorResponse(res, { code: 404, message: 'Post is Not Found' });
+      }
+      if (req.body.postId) {
+        validateId({ id: req.query.postId });
+        validateComment({ ...req.body });
+        const post = await findByKey(Post, { id: req.query.postId });
         if (!post) return errorResponse(res, { code: 404, message: 'Post is Not Found' });
       }
       next();

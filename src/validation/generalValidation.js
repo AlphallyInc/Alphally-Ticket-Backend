@@ -67,6 +67,23 @@ const GeneralValidation = {
     if (error) throw error.details[0].context.label;
     return true;
   },
+
+  /**
+   * validate comment payload
+   * @param {object} payload - user object
+   * @returns {object | boolean} - returns a boolean or an error object
+   * @memberof GeneralValidation
+   */
+  validateComment(payload) {
+    const schema = {
+      postId: joi.number().positive().label('Please a valid post id'),
+      comment: joi.string().required().label('Please a valid comment for the post'),
+      parentId: joi.number().positive().label('Please a valid comment parent id'),
+    };
+    const { error } = joi.validate({ ...payload }, schema);
+    if (error) throw error.details[0].context.label;
+    return true;
+  },
 };
 
 export default GeneralValidation;
