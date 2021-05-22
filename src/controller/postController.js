@@ -13,13 +13,15 @@ const {
 } = Helpers;
 const {
   addEntity,
-  deleteByKey
+  deleteByKey,
+  findByKey
 } = GeneralService;
 const {
   getPostByKey
 } = PostService;
 const {
   Post,
+  Like,
   Media,
   Comment,
   PostMedia
@@ -141,6 +143,37 @@ const PostController = {
       const { postId } = req.query;
       const comment = await addEntity(Comment, { ...req.body, postId, userId: id });
       return successResponse(res, { message: 'Comment Added Successfully', comment });
+    } catch (error) {
+      errorResponse(res, { code: 500, message: error });
+    }
+  },
+
+  /**
+   * like or unlike post
+   * @async
+   * @param {object} req
+   * @param {object} res
+   * @returns {JSON} a JSON response with user details and Token
+   * @memberof PostController
+   */
+  async likeOrUnlikePost(req, res) {
+    try {
+      let like;
+      // let like;
+      const { postId } = req.query;
+      const { id } = req.tokenData;
+      like = await findByKey(Like, { userId: id, postId });
+      if (like) {
+        like = await deleteByKey(Like, { userId: id, postId });
+        like = false;
+      } else {
+        like = await addEntity(Like, { userId: id, postId });
+        like = true;
+      }
+      return successResponse(res, {
+        message: like ? 'You Like A Post' : 'You Unliked A Post',
+        like
+      });
     } catch (error) {
       errorResponse(res, { code: 500, message: error });
     }

@@ -18,7 +18,8 @@ const {
   deletePost,
   getPost,
   addPostComment,
-  deleteComment
+  deleteComment,
+  likeOrUnlikePost
 } = PostController;
 
 router.post('/', userBouncers, upload.array('media'), verifyPost, addPost);
@@ -26,7 +27,7 @@ router.delete('/', userBouncers, verifyPostID, deletePost); // ?id=[]
 router.get('/', userBouncers, verifyPostID, getPost); // ?id=[]&isPublished=[]
 router.post('/comment', userBouncers, verifyPostID, addPostComment); // postId=[]
 router.delete('/comment', userBouncers, verifyComment, deleteComment); // postId=[]
-// router.patch('/like-post', Auth, likePost); // ?post_uuid
+router.post('/like', userBouncers, likeOrUnlikePost); // ?postId=[]
 // router.patch('/unlike-post', Auth, unLikePost); // ?post_uuid
 
 export default router;

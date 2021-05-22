@@ -21,7 +21,11 @@ module.exports = (sequelize, DataTypes) => {
       onDelete: 'CASCADE'
     },
   }, {});
-  Like.associate = () => {
+  Like.associate = (models) => {
+    Post.belongsTo(models.User, {
+      as: 'author',
+      foreignKey: 'userId'
+    });
   };
   return Like;
 };

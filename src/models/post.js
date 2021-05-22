@@ -1,5 +1,3 @@
-const postMedia = require("./postMedia");
-
 module.exports = (sequelize, DataTypes) => {
   const Post = sequelize.define('Post', {
     title: {
