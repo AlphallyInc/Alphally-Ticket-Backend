@@ -100,7 +100,7 @@ const PostService = {
           {
             model: User,
             as: 'user',
-            attributes: ['name'],
+            attributes: ['id', 'name'],
           },
         ],
         where: key,
@@ -127,7 +127,7 @@ const PostService = {
           {
             model: User,
             as: 'user',
-            attributes: ['name'],
+            attributes: ['id', 'name'],
           },
         ],
         where: key,
