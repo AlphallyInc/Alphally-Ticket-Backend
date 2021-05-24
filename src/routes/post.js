@@ -20,7 +20,8 @@ const {
   addPostComment,
   deleteComment,
   likeOrUnlikePost,
-  getLikeList
+  getLikeList,
+  getSeenPost
 } = PostController;
 
 router.post('/', userBouncers, upload.array('media'), verifyPost, addPost);
@@ -30,5 +31,6 @@ router.post('/comment', userBouncers, verifyPostID, addPostComment); // postId=[
 router.delete('/comment', userBouncers, verifyComment, deleteComment); // postId=[]
 router.post('/like', userBouncers, likeOrUnlikePost); // ?postId=[]
 router.get('/like', userBouncers, getLikeList); // ?postId=[]
+router.get('/seen', userBouncers, getSeenPost); // ?postId=[]
 
 export default router;

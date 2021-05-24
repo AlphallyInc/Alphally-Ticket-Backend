@@ -88,6 +88,10 @@ module.exports = (sequelize, DataTypes) => {
       as: 'likes',
       foreignKey: 'postId'
     });
+    Post.hasMany(models.PostSeen, {
+      as: 'seen',
+      foreignKey: 'postId'
+    });
   };
   return Post;
 };

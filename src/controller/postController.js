@@ -18,13 +18,15 @@ const {
 } = GeneralService;
 const {
   getPostByKey,
-  getLikeUserByKey
+  getLikeUserByKey,
+  getSeenPostByKey
 } = PostService;
 const {
   Post,
   Like,
   Media,
   Comment,
+  PostSeen,
   PostMedia
 } = database;
 
@@ -87,11 +89,19 @@ const PostController = {
     try {
       let postData;
       const { id, isPublished } = req.query;
-      if (id) postData = await getPostByKey({ id: req.query.id });
-      else if (isPublished) postData = await getPostByKey({ isPublished });
+      if (id) {
+        postData = await getPostByKey({ id: req.query.id });
+        const seeenpost = await findByKey(PostSeen, { postId: req.query.id, userId: req.tokenData.id });
+
+        if (!seeenpost) await addEntity(PostSeen, { postId: req.query.id, userId: req.tokenData.id });
+      } else if (isPublished) postData = await getPostByKey({ isPublished });
       else postData = await getPostByKey({});
       // eslint-disable-next-line max-len
-      postData = await postData.map((item) => ({ ...item.dataValues, likes: item.dataValues.likes.length }));
+      postData = await postData.map((item) => ({ 
+        ...item.dataValues,
+        likes: item.dataValues.likes.length,
+        seen: item.dataValues.seen.length 
+      }));
       return successResponse(res, { message: 'Post Gotten Successfully', postData });
     } catch (error) {
       errorResponse(res, { code: 500, message: error });
@@ -113,6 +123,26 @@ const PostController = {
       if (likeData.length > 0) likeData = likeData.map((item) => ({ name: item.user.name }))
       return successResponse(res, { likeData });
     } catch (error) {
+      errorResponse(res, { code: 500, message: error });
+    }
+  },
+
+  /**
+   * get posts
+   * @async
+   * @param {object} req
+   * @param {object} res
+   * @returns {JSON} a JSON response with user details and Token
+   * @memberof PostController
+   */
+  async getSeenPost(req, res) {
+    try {
+      const { postId } = req.query;
+      let seenData = await getSeenPostByKey({ postId });
+      if (seenData.length > 0) seenData = seenData.map((item) => ({ name: item.user.name }))
+      return successResponse(res, { seenData });
+    } catch (error) {
+            console.error(error);
       errorResponse(res, { code: 500, message: error });
     }
   },

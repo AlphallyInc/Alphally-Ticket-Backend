@@ -1,5 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
-  const SeenPost = sequelize.define('SeenPost', {
+  const PostSeen = sequelize.define('PostSeen', {
     userId: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -21,15 +21,15 @@ module.exports = (sequelize, DataTypes) => {
       onDelete: 'CASCADE'
     },
   }, {});
-  SeenPost.associate = (models) => {
-    SeenPost.belongsTo(models.User, {
+  PostSeen.associate = (models) => {
+    PostSeen.belongsTo(models.User, {
       as: 'user',
       foreignKey: 'userId'
     });
-    SeenPost.belongsTo(models.Post, {
+    PostSeen.belongsTo(models.Post, {
       as: 'post',
       foreignKey: 'postId'
     });
   };
-  return SeenPost;
+  return PostSeen;
 };
