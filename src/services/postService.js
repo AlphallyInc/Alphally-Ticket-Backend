@@ -78,6 +78,33 @@ const PostService = {
     } catch (error) {
       throw new Error(error);
     }
+  },
+
+  /**
+   * Get user likes by post
+   * @async
+   * @param {object} key - inputs like names or tags
+   * @returns {promise-Object} - A promise object with entity details
+   * @memberof PostService
+   */
+  async getLikeUserByKey(key) {
+    try {
+      const entities = await Like.findAll({
+        include: [
+          {
+            model: User,
+            as: 'user',
+            attributes: ['name'],
+          },
+        ],
+        where: key,
+        attributes: ['id'],
+        returning: true
+      });
+      return entities;
+    } catch (error) {
+      throw new Error(error);
+    }
   }
 };
 

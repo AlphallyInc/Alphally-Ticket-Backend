@@ -17,7 +17,8 @@ const {
   findByKey
 } = GeneralService;
 const {
-  getPostByKey
+  getPostByKey,
+  getLikeUserByKey
 } = PostService;
 const {
   Post,
@@ -92,6 +93,25 @@ const PostController = {
       // eslint-disable-next-line max-len
       postData = await postData.map((item) => ({ ...item.dataValues, likes: item.dataValues.likes.length }));
       return successResponse(res, { message: 'Post Gotten Successfully', postData });
+    } catch (error) {
+      errorResponse(res, { code: 500, message: error });
+    }
+  },
+
+  /**
+   * get posts
+   * @async
+   * @param {object} req
+   * @param {object} res
+   * @returns {JSON} a JSON response with user details and Token
+   * @memberof PostController
+   */
+  async getLikeList(req, res) {
+    try {
+      const { postId } = req.query;
+      let likeData = await getLikeUserByKey({ postId });
+      if (likeData.length > 0) likeData = likeData.map((item) => ({ name: item.user.name }))
+      return successResponse(res, { likeData });
     } catch (error) {
       errorResponse(res, { code: 500, message: error });
     }
