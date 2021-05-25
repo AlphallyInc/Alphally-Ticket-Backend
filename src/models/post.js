@@ -92,6 +92,11 @@ module.exports = (sequelize, DataTypes) => {
       as: 'seen',
       foreignKey: 'postId'
     });
+    // Post.belongsToMany(models.User, {
+    //   through: 'Comment',
+    //   as: 'commenters',
+    //   foreignKey: 'postId'
+    // });
   };
   return Post;
 };

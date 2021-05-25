@@ -41,26 +41,7 @@ const PostService = {
             model: Comment,
             as: 'comments',
             attributes: ['id', 'comment'],
-            where: { parentId: null },
-            include: [
-              {
-                model: User,
-                as: 'commenter',
-                attributes: ['id', 'name', 'username', 'imageUrl']
-              },
-              {
-                model: Comment,
-                as: 'replyComments',
-                attributes: ['id', 'comment'],
-                include: [
-                  {
-                    model: User,
-                    as: 'commenter',
-                    attributes: ['id', 'name', 'username', 'imageUrl']
-                  }
-                ]
-              },
-            ],
+            where: {}
           },
           {
             model: PostMedia,
@@ -78,6 +59,57 @@ const PostService = {
         order: [
           ['id', 'DESC']
         ],
+        returning: true
+      });
+      return entities;
+    } catch (error) {
+      throw new Error(error);
+    }
+  },
+
+  /**
+   * Get comments posts
+   * @async
+   * @param {object} key - inputs like names or tags
+   * @returns {promise-Object} - A promise object with entity details
+   * @memberof PostService
+   */
+  async getCommentsByKey(key) {
+    try {
+      const entities = await Post.findAll({
+        include: [
+          {
+            model: Comment,
+            as: 'comments',
+            attributes: ['id', 'comment'],
+            where: { parentId: null },
+            include: [
+              {
+                model: User,
+                as: 'commenter',
+                attributes: ['id', 'name', 'username', 'imageUrl'],
+              },
+              {
+                model: Comment,
+                as: 'replyComments',
+                attributes: ['id', 'comment'],
+                include: [
+                  {
+                    model: User,
+                    as: 'commenter',
+                    attributes: ['id', 'name', 'username', 'imageUrl'],
+                  }
+                ]
+              },
+            ]
+          },
+
+        ],
+        where: { id: key.postId },
+        order: [
+          ['id', 'DESC']
+        ],
+        attributes: [],
         returning: true
       });
       return entities;

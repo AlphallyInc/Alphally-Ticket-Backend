@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import { GeneralService, PostService } from '../services';
 import { Toolbox, Helpers } from '../utils';
 import database from '../models';
@@ -19,7 +20,8 @@ const {
 const {
   getPostByKey,
   getLikeUserByKey,
-  getSeenPostByKey
+  getSeenPostByKey,
+  getCommentsByKey
 } = PostService;
 const {
   Post,
@@ -92,15 +94,15 @@ const PostController = {
       if (id) {
         postData = await getPostByKey({ id: req.query.id });
         const seeenpost = await findByKey(PostSeen, { postId: req.query.id, userId: req.tokenData.id });
-
-        if (!seeenpost) await addEntity(PostSeen, { postId: req.query.id, userId: req.tokenData.id });
+        if (!seeenpost) { await addEntity(PostSeen, { postId: req.query.id, userId: req.tokenData.id }); }
       } else if (isPublished) postData = await getPostByKey({ isPublished });
       else postData = await getPostByKey({});
       // eslint-disable-next-line max-len
-      postData = await postData.map((item) => ({ 
+      postData = await postData.map((item) => ({
         ...item.dataValues,
         likes: item.dataValues.likes.length,
-        seen: item.dataValues.seen.length 
+        seen: item.dataValues.seen.length,
+        comments: item.dataValues.comments.length
       }));
       return successResponse(res, { message: 'Post Gotten Successfully', postData });
     } catch (error) {
@@ -120,7 +122,7 @@ const PostController = {
     try {
       const { postId } = req.query;
       let likeData = await getLikeUserByKey({ postId });
-      if (likeData.length > 0) likeData = likeData.map((item) => ({ name: item.user.name }))
+      if (likeData.length > 0) likeData = likeData.map((item) => ({ name: item.user.name }));
       return successResponse(res, { likeData });
     } catch (error) {
       errorResponse(res, { code: 500, message: error });
@@ -139,10 +141,27 @@ const PostController = {
     try {
       const { postId } = req.query;
       let seenData = await getSeenPostByKey({ postId });
-      if (seenData.length > 0) seenData = seenData.map((item) => ({ name: item.user.name }))
+      if (seenData.length > 0) seenData = seenData.map((item) => ({ name: item.user.name }));
       return successResponse(res, { seenData });
     } catch (error) {
-            console.error(error);
+      errorResponse(res, { code: 500, message: error });
+    }
+  },
+
+  /**
+   * get comments
+   * @async
+   * @param {object} req
+   * @param {object} res
+   * @returns {JSON} a JSON response with user details and Token
+   * @memberof PostController
+   */
+  async getComments(req, res) {
+    try {
+      const { postId } = req.query;
+      const commentData = await getCommentsByKey({ postId });
+      return successResponse(res, { commentData });
+    } catch (error) {
       errorResponse(res, { code: 500, message: error });
     }
   },

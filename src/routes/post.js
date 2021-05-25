@@ -21,12 +21,14 @@ const {
   deleteComment,
   likeOrUnlikePost,
   getLikeList,
-  getSeenPost
+  getSeenPost,
+  getComments
 } = PostController;
 
 router.post('/', userBouncers, upload.array('media'), verifyPost, addPost);
 router.delete('/', userBouncers, verifyPostID, deletePost); // ?id=[]
 router.get('/', userBouncers, verifyPostID, getPost); // ?id=[]&isPublished=[]
+router.get('/comment', userBouncers, getComments); // ?postId
 router.post('/comment', userBouncers, verifyPostID, addPostComment); // postId=[]
 router.delete('/comment', userBouncers, verifyComment, deleteComment); // postId=[]
 router.post('/like', userBouncers, likeOrUnlikePost); // ?postId=[]
