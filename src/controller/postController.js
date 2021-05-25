@@ -21,7 +21,8 @@ const {
   getPostByKey,
   getLikeUserByKey,
   getSeenPostByKey,
-  getCommentsByKey
+  getCommentsByKey,
+  getPostCommentsByKey
 } = PostService;
 const {
   Post,
@@ -29,7 +30,8 @@ const {
   Media,
   Comment,
   PostSeen,
-  PostMedia
+  PostMedia,
+  CommentLike
 } = database;
 
 const PostController = {
@@ -158,8 +160,22 @@ const PostController = {
    */
   async getComments(req, res) {
     try {
-      const { postId } = req.query;
-      const commentData = await getCommentsByKey({ postId });
+      let commentData;
+      if (req.query.postId) {
+        const datas = await getPostCommentsByKey({ id: req.query.postId });
+        commentData = datas[0].comments;
+      }
+      if (req.query.commentId) {
+        const datas = await getCommentsByKey({ id: req.query.commentId });
+        commentData = datas;
+      }
+      if (commentData.length > 0) {
+        commentData = commentData.map((item) => ({
+          ...item.dataValues,
+          replyComments: item.dataValues.replyComments.length,
+          likes: item.dataValues.likes.length,
+        }));
+      }
       return successResponse(res, { commentData });
     } catch (error) {
       errorResponse(res, { code: 500, message: error });
@@ -243,6 +259,37 @@ const PostController = {
       }
       return successResponse(res, {
         message: like ? 'You Like A Post' : 'You Unliked A Post',
+        like
+      });
+    } catch (error) {
+      errorResponse(res, { code: 500, message: error });
+    }
+  },
+
+  /**
+   * like or unlike post comment
+   * @async
+   * @param {object} req
+   * @param {object} res
+   * @returns {JSON} a JSON response with user details and Token
+   * @memberof PostController
+   */
+  async likeOrUnlikeComment(req, res) {
+    try {
+      let like;
+      // let like;
+      const { commentId } = req.query;
+      const { id } = req.tokenData;
+      like = await findByKey(CommentLike, { userId: id, commentId });
+      if (like) {
+        like = await deleteByKey(CommentLike, { userId: id, commentId });
+        like = false;
+      } else {
+        like = await addEntity(CommentLike, { userId: id, commentId });
+        like = true;
+      }
+      return successResponse(res, {
+        message: like ? 'You Like A Comment' : 'You Unliked A Comment',
         like
       });
     } catch (error) {

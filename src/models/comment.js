@@ -48,6 +48,10 @@ module.exports = (sequelize, DataTypes) => {
       as: 'replyComments',
       foreignKey: 'parentId'
     });
+    Comment.hasMany(models.CommentLike, {
+      as: 'likes',
+      foreignKey: 'commentId'
+    });
     Comment.belongsTo(models.Comment, {
       as: 'replyComment',
       foreignKey: 'parentId'

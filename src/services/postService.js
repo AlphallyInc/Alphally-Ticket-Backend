@@ -7,7 +7,8 @@ const {
   Media,
   Comment,
   PostSeen,
-  PostMedia
+  PostMedia,
+  CommentLike
 } = database;
 
 const PostService = {
@@ -76,6 +77,47 @@ const PostService = {
    */
   async getCommentsByKey(key) {
     try {
+      const entities = await Comment.findAll({
+        include: [
+          {
+            model: User,
+            as: 'commenter',
+            attributes: ['id', 'name', 'username', 'imageUrl'],
+          },
+          {
+            model: CommentLike,
+            as: 'likes',
+            attributes: ['id'],
+          },
+          {
+            model: Comment,
+            as: 'replyComments',
+            attributes: ['id', 'comment']
+          },
+
+        ],
+        where: key,
+        order: [
+          ['id', 'ASC']
+        ],
+        attributes: ['id', 'comment'],
+        returning: true
+      });
+      return entities;
+    } catch (error) {
+      throw new Error(error);
+    }
+  },
+
+  /**
+   * Get comments posts
+   * @async
+   * @param {object} key - inputs like names or tags
+   * @returns {promise-Object} - A promise object with entity details
+   * @memberof PostService
+   */
+  async getPostCommentsByKey(key) {
+    try {
       const entities = await Post.findAll({
         include: [
           {
@@ -90,24 +132,22 @@ const PostService = {
                 attributes: ['id', 'name', 'username', 'imageUrl'],
               },
               {
+                model: CommentLike,
+                as: 'likes',
+                attributes: ['id'],
+              },
+              {
                 model: Comment,
                 as: 'replyComments',
-                attributes: ['id', 'comment'],
-                include: [
-                  {
-                    model: User,
-                    as: 'commenter',
-                    attributes: ['id', 'name', 'username', 'imageUrl'],
-                  }
-                ]
+                attributes: ['id'],
               },
             ]
           },
 
         ],
-        where: { id: key.postId },
+        where: key,
         order: [
-          ['id', 'DESC']
+          ['id', 'ASC']
         ],
         attributes: [],
         returning: true
