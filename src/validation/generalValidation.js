@@ -45,6 +45,8 @@ const GeneralValidation = {
           country: joi.valid(countries).label('Please country must be capitalized'),
         })
       ).label('Please a valid cinema address'),
+      city: joi.string().min(3).max(25).label('Please input a city name'),
+      country: joi.valid(countries).label('Please country must be capitalized'),
     };
     const { error } = joi.validate({ ...payload }, schema);
     if (error) throw error.details[0].context.label;

@@ -62,7 +62,6 @@ const AdminMiddleware = {
       if (cinema) return errorResponse(res, { code: 400, message: 'Cinema already exist' });
       next();
     } catch (error) {
-      console.error(error);
       errorResponse(res, { code: 400, message: error });
     }
   },

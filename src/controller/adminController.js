@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import { GeneralService, AdminService } from '../services';
 import { Toolbox } from '../utils';
 import database from '../models';
@@ -119,6 +120,61 @@ const AdminController = {
   },
 
   /**
+   * update cinema name
+   * @async
+   * @param {object} req
+   * @param {object} res
+   * @returns {JSON} a JSON response with user details and Token
+   * @memberof AdminController
+   */
+  async updateCinemaName(req, res) {
+    try {
+      const { name } = req.body;
+      const { id } = req.query;
+      const updateCinema = await updateByKey(Cinema, { name }, { id });
+      return successResponse(res, { message: 'Cinema Name Updated Successfully', updateCinema });
+    } catch (error) {
+      errorResponse(res, { code: 500, message: error });
+    }
+  },
+
+  /**
+   * update cinema name
+   * @async
+   * @param {object} req
+   * @param {object} res
+   * @returns {JSON} a JSON response with user details and Token
+   * @memberof AdminController
+   */
+  async updateSingleDetails(req, res) {
+    try {
+      const { cinemaAddressId } = req.query;
+      const updateCinema = await updateByKey(CinemaAddress, { ...req.body }, { id: cinemaAddressId });
+      return successResponse(res, { message: 'Cinema Updated Successfully', updateCinema });
+    } catch (error) {
+      errorResponse(res, { code: 500, message: error });
+    }
+  },
+
+  /**
+   * update cinema name
+   * @async
+   * @param {object} req
+   * @param {object} res
+   * @returns {JSON} a JSON response with user details and Token
+   * @memberof AdminController
+   */
+  async addSingleAddressToCinema(req, res) {
+    try {
+      const { id } = req.query;
+      const cinema = await addEntity(CinemaAddress, { ...req.body, cinemaId: id });
+      return successResponse(res, { message: 'Cinema Updated Successfully', cinema });
+    } catch (error) {
+      errorResponse(res, { code: 500, message: error });
+    }
+  },
+
+  /**
    * update cinema
    * @async
    * @param {object} req
@@ -165,7 +221,6 @@ const AdminController = {
       else cinemas = await getCinemas({});
       return successResponse(res, { message: 'Cinema gotten successfully', cinemas });
     } catch (error) {
-      console.error(error);
       errorResponse(res, { code: 500, message: error });
     }
   },
