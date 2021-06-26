@@ -1,5 +1,8 @@
 /* eslint-disable no-useless-escape */
 import joi from '@hapi/joi';
+import validationData from './validationData';
+
+const { states } = validationData;
 
 const GeneralValidation = {
 
@@ -62,6 +65,49 @@ const GeneralValidation = {
       title: joi.string().required().label('Please a valid post title'),
       body: joi.string().required().label('Please a valid post message'),
       privacyId: joi.number().positive().label('Please a valid privacy id'),
+    };
+    const { error } = joi.validate({ ...payload }, schema);
+    if (error) throw error.details[0].context.label;
+    return true;
+  },
+
+  /**
+   * validate cinema payload
+   * @param {object} payload - user object
+   * @returns {object | boolean} - returns a boolean or an error object
+   * @memberof GeneralValidation
+   */
+  validateCinema(payload) {
+    const schema = {
+      name: joi.string().required().label('Please a valid cinema name'),
+      address: joi.string().required().label('Please a valid cinema address'),
+      capacity: joi.number().positive().required().label('Please a valid cinema capacity'),
+      seats: joi.number().positive().required().label('Please a valid cinema seats number'),
+      state: joi.valid(states).required().label('Please input a valid state name'),
+    };
+    const { error } = joi.validate({ ...payload }, schema);
+    if (error) throw error.details[0].context.label;
+    return true;
+  },
+
+  /**
+   * validate movie payload
+   * @param {object} payload - user object
+   * @returns {object | boolean} - returns a boolean or an error object
+   * @memberof GeneralValidation
+   */
+  validateMovie(payload) {
+    const schema = {
+      title: joi.string().required().label('Please a valid post title'),
+      storyLine: joi.string().required().label('Please a valid movie story line'),
+      releaseDate: joi.date().required().label('Please a valid date when the movie will be released'),
+      showDate: joi.date().required().label('Please a valid date when the movie will be released'),
+      discount: joi.number().precision(2).label('Please a valid discount, it\'s percentage should be presented in at most 2 decimal pllaces'),
+      ticketPrice: joi.number().positive().required().label('Please a valid movie ticket price'),
+      shareLink: joi.string().uri().label('Please a valid and shareable link  '),
+      duration: joi.string().alphanum().required().label("Please duration should be for example '90 minutes' to be valid"),
+      privacyId: joi.number().integer().positive().label('Please a valid privacy value'),
+      cinemaId: joi.number().integer().positive().label('Please a valid cinema'),
     };
     const { error } = joi.validate({ ...payload }, schema);
     if (error) throw error.details[0].context.label;

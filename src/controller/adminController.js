@@ -15,7 +15,8 @@ const {
 //   getUserProfile
 // } = UserService;
 const {
-  Privacy
+  Privacy,
+  Cinema
 } = database;
 
 const AdminController = {
@@ -48,6 +49,30 @@ const AdminController = {
     try {
       const privacy = await addEntity(Privacy, { ...req.body });
       return successResponse(res, { message: 'Privacy Added Successfully', privacy });
+    } catch (error) {
+      errorResponse(res, { code: 500, message: error });
+    }
+  },
+
+  /**
+   * add a single cinema
+   * @async
+   * @param {object} req
+   * @param {object} res
+   * @returns {JSON} a JSON response with user details and Token
+   * @memberof AdminController
+   */
+  async addCinema(req, res) {
+    try {
+      const body = {
+        name: req.body.name.toLowercase(),
+        address: req.body.address.toLowercase(),
+        caoacity: req.body.capacity || '',
+        seats: req.body.seats || '',
+        state: req.body.state.toLowercase(),
+      };
+      const cinema = await addEntity(Cinema, { ...body });
+      return successResponse(res, { message: 'Cinema Added Successfully', cinema });
     } catch (error) {
       errorResponse(res, { code: 500, message: error });
     }
