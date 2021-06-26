@@ -9,18 +9,28 @@ const {
 } = Bouncers;
 const {
   verifyPrivacy,
-  verifyCinemaPayload
+  verifyCinemaPayload,
+  verifyCinema
 } = AdminMiddleware;
 const {
   addPrivacyAll,
   addPrivacy,
   deletePrivacy,
-  addCinema
+  addCinema,
+  updateAllCinemaDetails,
+  deleteCinema,
+  getAllCinema
 } = AdminController;
 
+// Privacy routes
 router.post('/privacy/all', adminBouncers, addPrivacyAll);
 router.post('/privacy/single', adminBouncers, verifyPrivacy, addPrivacy);
 router.delete('/privacy', adminBouncers, deletePrivacy);
+
+// dont forget to add admin bouncers for cinema routes
 router.post('/cinema', adminBouncers, verifyCinemaPayload, addCinema);
+router.patch('/cinema', verifyCinema, updateAllCinemaDetails); // id=[]
+router.delete('/cinema', verifyCinema, deleteCinema); // id=[]
+router.get('/cinema', verifyCinema, getAllCinema); // id=[]
 
 export default router;

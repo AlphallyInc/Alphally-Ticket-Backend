@@ -1,22 +1,25 @@
-import { GeneralService } from '../services';
+import { GeneralService, AdminService } from '../services';
 import { Toolbox } from '../utils';
 import database from '../models';
 
 const {
   successResponse,
   errorResponse,
+  getCinemaPayload
 } = Toolbox;
 const {
   addEntity,
   findByKey,
-  deleteByKey
+  deleteByKey,
+  updateByKey,
 } = GeneralService;
-// const {
-//   getUserProfile
-// } = UserService;
+const {
+  getCinemas
+} = AdminService;
 const {
   Privacy,
-  Cinema
+  Cinema,
+  CinemaAddress
 } = database;
 
 const AdminController = {
@@ -64,14 +67,15 @@ const AdminController = {
    */
   async addCinema(req, res) {
     try {
-      const body = {
-        name: req.body.name.toLowercase(),
-        address: req.body.address.toLowercase(),
-        caoacity: req.body.capacity || '',
-        seats: req.body.seats || '',
-        state: req.body.state.toLowercase(),
-      };
-      const cinema = await addEntity(Cinema, { ...body });
+      const { name, addresses } = req.body;
+      const cinema = await Cinema.create({ name, addresses }, {
+        include: [
+          {
+            model: CinemaAddress,
+            as: 'addresses'
+          }
+        ]
+      });
       return successResponse(res, { message: 'Cinema Added Successfully', cinema });
     } catch (error) {
       errorResponse(res, { code: 500, message: error });
@@ -93,6 +97,75 @@ const AdminController = {
       await deleteByKey(Privacy, { id: req.query.id });
       return successResponse(res, { message: 'Privacy Deleted Successfully' });
     } catch (error) {
+      errorResponse(res, { code: 500, message: error });
+    }
+  },
+
+  /**
+   * delete cinema
+   * @async
+   * @param {object} req
+   * @param {object} res
+   * @returns {JSON} a JSON response with user details and Token
+   * @memberof AdminController
+   */
+  async deleteCinema(req, res) {
+    try {
+      await deleteByKey(Cinema, { id: req.query.id });
+      return successResponse(res, { message: 'Cinema Deleted Successfully' });
+    } catch (error) {
+      errorResponse(res, { code: 500, message: error });
+    }
+  },
+
+  /**
+   * update cinema
+   * @async
+   * @param {object} req
+   * @param {object} res
+   * @returns {JSON} a JSON response with user details and Token
+   * @memberof AdminController
+   */
+  async updateAllCinemaDetails(req, res) {
+    const { cinema } = req;
+    const { id } = req.query;
+    try {
+      const { name, addresses } = req.body;
+      let updateCinema;
+      if (name) updateCinema = await updateByKey(Cinema, { name }, { id });
+      if (addresses) {
+        const formalAddress = cinema[0].addresses;
+        const payload = getCinemaPayload(addresses, formalAddress);
+        const { currentPayload, newPayload } = payload;
+        if (currentPayload.length) await CinemaAddress.bulkCreate(currentPayload, { updateOnDuplicate: ['state', 'city', 'seats', 'country', 'address'] });
+        if (newPayload.length) {
+          const addressPayload = newPayload.map((item) => ({ ...item, cinemaId: id }));
+          await CinemaAddress.bulkCreate(addressPayload);
+        }
+      }
+      updateCinema = await getCinemas({ id });
+      return successResponse(res, { message: 'Cinema Updated Successfully', updateCinema });
+    } catch (error) {
+      errorResponse(res, { code: 500, message: error });
+    }
+  },
+
+  /**
+   * update cinema
+   * @async
+   * @param {object} req
+   * @param {object} res
+   * @returns {JSON} a JSON response with user details and Token
+   * @memberof AdminController
+   */
+  async getAllCinema(req, res) {
+    try {
+      let cinemas;
+      if (req.query.id) cinemas = await getCinemas({ id: req.query.id });
+      else cinemas = await getCinemas({});
+      return successResponse(res, { message: 'Cinema gotten successfully', cinemas });
+    } catch (error) {
+      console.error(error);
       errorResponse(res, { code: 500, message: error });
     }
   },
