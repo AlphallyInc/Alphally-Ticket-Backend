@@ -1,6 +1,6 @@
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('Comments', {
+    await queryInterface.createTable('PostSeens', {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -27,20 +27,6 @@ module.exports = {
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE'
       },
-      parentId: {
-        type: Sequelize.INTEGER,
-        allowNull: true,
-        references: {
-          model: 'Comments',
-          key: 'id'
-        },
-        onUpdate: 'CASCADE',
-        onDelete: 'CASCADE'
-      },
-      comment: {
-        type: Sequelize.TEXT,
-        allowNull: false
-      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE
@@ -52,6 +38,6 @@ module.exports = {
     });
   },
   down: async (queryInterface) => {
-    await queryInterface.dropTable('Comments');
+    await queryInterface.dropTable('PostSeens');
   }
 };

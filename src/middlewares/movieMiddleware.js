@@ -1,43 +1,37 @@
 import { GeneralValidation } from '../validation';
 import { Toolbox } from '../utils';
-import { GeneralService, AdminService } from '../services';
+import { GeneralService } from '../services';
 import database from '../models';
 
 const {
   errorResponse,
 } = Toolbox;
 const {
-  validatePrivacy,
-  validateCinema,
-  validateParameters,
-  validateId
+  validateMovie,
+  validateId,
+  validateComment
 } = GeneralValidation;
-const {
-  getCinemas
-} = AdminService;
 const {
   findByKey
 } = GeneralService;
 const {
-  Privacy,
-  Cinema
+  Post,
+  Comment
 } = database;
 
-const AdminMiddleware = {
+const MovieMiddleware = {
   /**
-   * middleware validating privacy payload
+   * middleware validating movie payload
    * @async
    * @param {object} req - the api request
    * @param {object} res - api response returned by method
    * @param {object} next - returned values going into next function
    * @returns {object} - returns error or response object
-   * @memberof AdminMiddleware
+   * @memberof MovieMiddleware
    */
-  async verifyPrivacy(req, res, next) {
+  async verifyMoviePayload(req, res, next) {
     try {
-      validatePrivacy(req.body);
-      const privacy = await findByKey(Privacy, { type: req.body.type });
-      if (privacy) return errorResponse(res, { code: 409, message: 'Privacy Type already exist' });
+      validateMovie(req.body);
       next();
     } catch (error) {
       errorResponse(res, { code: 400, message: error });
@@ -45,45 +39,48 @@ const AdminMiddleware = {
   },
 
   /**
-   * middleware validating cinema payload
+   * middleware validating post payload
    * @async
    * @param {object} req - the api request
    * @param {object} res - api response returned by method
    * @param {object} next - returned values going into next function
    * @returns {object} - returns error or response object
-   * @memberof AdminMiddleware
+   * @memberof MovieMiddleware
    */
-  async verifyCinemaPayload(req, res, next) {
+  async verifyPostID(req, res, next) {
     try {
-      validateCinema(req.body);
-      const { name } = req.body;
-      req.body.name = name.toLowerCase();
-      const cinema = await findByKey(Cinema, { name: req.body.name });
-      if (cinema) return errorResponse(res, { code: 400, message: 'Cinema already exist' });
-      next();
-    } catch (error) {
-      errorResponse(res, { code: 400, message: error });
-    }
-  },
-
-  /**
-   * middleware validating cinema payload
-   * @async
-   * @param {object} req - the api request
-   * @param {object} res - api response returned by method
-   * @param {object} next - returned values going into next function
-   * @returns {object} - returns error or response object
-   * @memberof AdminMiddleware
-   */
-  async verifyCinema(req, res, next) {
-    try {
-      if (req.body) validateParameters(req.body);
       if (req.query.id) {
-        const { id } = req.query;
-        validateId({ id });
-        const cinema = await getCinemas({ id });
-        if (!cinema.length) return errorResponse(res, { code: 400, message: 'Cinema does not exist' });
-        req.cinema = cinema;
+        validateId({ id: req.query.id });
+        const post = await findByKey(Post, { id: req.query.id });
+        if (!post) return errorResponse(res, { code: 404, message: 'Post is Not Found' });
+      }
+      if (req.body.postId) {
+        validateId({ id: req.query.postId });
+        validateComment({ ...req.body });
+        const post = await findByKey(Post, { id: req.query.postId });
+        if (!post) return errorResponse(res, { code: 404, message: 'Post is Not Found' });
+      }
+      next();
+    } catch (error) {
+      errorResponse(res, { code: 400, message: error });
+    }
+  },
+
+  /**
+   * middleware validating comment id payload
+   * @async
+   * @param {object} req - the api request
+   * @param {object} res - api response returned by method
+   * @param {object} next - returned values going into next function
+   * @returns {object} - returns error or response object
+   * @memberof MovieMiddleware
+   */
+  async verifyComment(req, res, next) {
+    try {
+      if (req.query.id) {
+        validateId({ id: req.query.id });
+        const comment = await findByKey(Comment, { id: req.query.id });
+        if (!comment) return errorResponse(res, { code: 404, message: 'Comment is Not Found' });
       }
       next();
     } catch (error) {
@@ -92,4 +89,4 @@ const AdminMiddleware = {
   },
 };
 
-export default AdminMiddleware;
+export default MovieMiddleware;

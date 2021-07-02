@@ -1,23 +1,19 @@
 module.exports = {
-  up: (queryInterface, Sequelize) => queryInterface.createTable('Verifications', {
+  up: (queryInterface, Sequelize) => queryInterface.createTable('Roles', {
     id: {
       allowNull: false,
       autoIncrement: true,
       primaryKey: true,
       type: Sequelize.INTEGER
     },
-    token: {
+    role: {
+      type: Sequelize.STRING,
+      allowNull: false,
+      defaultValue: 'user'
+    },
+    description: {
       type: Sequelize.STRING,
       allowNull: true
-    },
-    email: {
-      type: Sequelize.STRING,
-      allowNull: false
-    },
-    verified: {
-      type: Sequelize.BOOLEAN,
-      allowNull: false,
-      defaultValue: false
     },
     createdAt: {
       allowNull: false,
@@ -28,5 +24,6 @@ module.exports = {
       type: Sequelize.DATE
     }
   }),
-  down: (queryInterface) => queryInterface.dropTable('Verifications')
+
+  down: (queryInterface) => queryInterface.dropTable('Roles')
 };

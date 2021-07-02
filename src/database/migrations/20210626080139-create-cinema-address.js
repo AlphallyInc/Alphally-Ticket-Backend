@@ -1,31 +1,41 @@
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('Cinemas', {
+    await queryInterface.createTable('CinemaAddresses', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      name: {
-        type: Sequelize.STRING,
-        allowNull: false
-      },
       address: {
         type: Sequelize.TEXT,
-        allowNull: true
+        allowNull: false
       },
-      capacity: {
+      city: {
         type: Sequelize.STRING,
         allowNull: true
       },
       seats: {
         type: Sequelize.STRING,
-        allowNull: true
+        allowNull: false
       },
       state: {
         type: Sequelize.STRING,
-        allowNull: true
+        allowNull: false
+      },
+      country: {
+        type: Sequelize.STRING,
+        allowNull: false
+      },
+      cinemaId: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: {
+          model: 'Cinemas',
+          key: 'id'
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
       },
       createdAt: {
         allowNull: false,
@@ -38,6 +48,6 @@ module.exports = {
     });
   },
   down: async (queryInterface) => {
-    await queryInterface.dropTable('Cinemas');
+    await queryInterface.dropTable('CinemaAddresses');
   }
 };

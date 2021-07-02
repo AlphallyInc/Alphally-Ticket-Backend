@@ -1,3 +1,5 @@
+/* eslint-disable max-len */
+/* eslint-disable valid-jsdoc */
 /* eslint-disable linebreak-style */
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
@@ -199,5 +201,40 @@ export default class Toolbox {
     });
 
     return result;
+  }
+
+  /**
+   * upload video by recursion
+   * @static
+   * @param {array} bodyAddress - array of images to be uploaded
+   * @param {array} databaseAddress - array of images to be uploaded
+   * @returns {array} url - array of images urls uploaded
+   * @memberof Toolbox
+   */
+  static getCinemaPayload(bodyAddress, databaseAddress, currentPayload = [], newPayload = []) {
+    if (bodyAddress.length < 1) return { currentPayload, newPayload };
+
+    const [singleBodyAddress] = bodyAddress;
+    const {
+      address, city, seats, state, country
+    } = singleBodyAddress;
+    if (databaseAddress.length > 0) {
+      const singleDatabaseAddress = databaseAddress[0];
+      currentPayload.push({
+        id: singleDatabaseAddress.id,
+        address: address || singleDatabaseAddress.address,
+        city: city || singleDatabaseAddress.city,
+        seats: seats || singleDatabaseAddress.seats,
+        state: state || singleDatabaseAddress.state,
+        country: country || singleDatabaseAddress.country,
+        cinemaId: singleDatabaseAddress.cinemaId
+      });
+    } else {
+      newPayload.push({
+        address, city, seats, state, country
+      });
+    }
+
+    return Toolbox.getCinemaPayload(bodyAddress.slice(1), databaseAddress.slice(1), currentPayload, newPayload);
   }
 }

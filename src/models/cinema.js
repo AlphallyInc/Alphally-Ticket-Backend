@@ -5,7 +5,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false
     },
     address: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT,
       allowNull: true
     },
     capacity: {
@@ -21,7 +21,11 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: true
     },
   }, {});
-  Cinema.associate = () => {
+  Cinema.associate = (models) => {
+    Cinema.hasMany(models.CinemaAddress, {
+      as: 'addresses',
+      foreignKey: 'cinemaId',
+    });
   };
   return Cinema;
 };

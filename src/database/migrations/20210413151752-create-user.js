@@ -66,7 +66,7 @@ module.exports = {
     },
     verificationId: {
       type: Sequelize.INTEGER,
-      allowNull: false,
+      allowNull: true,
       references: {
         model: 'Verifications',
         key: 'id'

@@ -62,7 +62,7 @@ module.exports = (sequelize, DataTypes) => {
       },
       verificationId: {
         type: DataTypes.INTEGER,
-        allowNull: false,
+        allowNull: true,
         references: {
           model: 'Verification',
           key: 'id'
@@ -74,9 +74,10 @@ module.exports = (sequelize, DataTypes) => {
     {}
   );
   User.associate = (models) => {
-    User.belongsTo(models.Verification, {
-      as: 'verification',
-      foreignKey: 'verificationId'
+    User.belongsToMany(models.Role, {
+      through: 'RoleUser',
+      as: 'roles',
+      foreignKey: 'userId'
     });
     User.hasMany(models.Follower, {
       as: 'follower',
@@ -86,6 +87,19 @@ module.exports = (sequelize, DataTypes) => {
       as: 'posts',
       foreignKey: 'userId'
     });
+    User.hasMany(models.Comment, {
+      as: 'comments',
+      foreignKey: 'postId'
+    });
+    User.hasMany(models.Like, {
+      as: 'likes',
+      foreignKey: 'postId'
+    });
+    // User.belongsToMany(models.Post, {
+    //   through: 'Comment',
+    //   as: 'commenter',
+    //   foreignKey: 'userId'
+    // });
   };
   return User;
 };
