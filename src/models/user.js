@@ -78,6 +78,11 @@ module.exports = (sequelize, DataTypes) => {
       as: 'verification',
       foreignKey: 'verificationId'
     });
+    User.hasOne(models.Role, {
+      through: 'RoleUsers',
+      as: 'role',
+      foreignKey: 'userId'
+    });
     User.hasMany(models.Follower, {
       as: 'follower',
       foreignKey: 'followerId'

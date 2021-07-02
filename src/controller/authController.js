@@ -125,32 +125,34 @@ const AuthController = {
    */
   async signup(req, res) {
     try {
-      let refferalUser = null;
-      if (req.body.refferalCode) {
-        const { refferalCode } = req.body;
-        validateRefferalCode({ refferalCode });
-        refferalUser = await findByKey(User, { refferalCode: req.body.refferalCode });
-        if (!refferalUser) return errorResponse(res, { code: 409, message: 'Referal does not exist' });
-      }
-      const { verification } = req;
-      const { password } = req.body;
       const body = {
-        ...req.body,
-        password: hashPassword(password),
-        referrerId: refferalUser !== null ? refferalUser.id : refferalUser,
-        verificationId: verification.id
+        firstName: req.body.firstName,
+        lastName: req.body.lastName,
+        userName: req.body.userName,
+        email: req.body.email,
+        password: hashPassword(req.body.password),
+        supplier: req.body.supplier,
+        companyTheme: req.body.companyTheme
       };
-      const user = await addEntity(User, body);
-      const token = createToken({
+      const user = await addEntity(User, { ...body });
+      let role;
+      if (req.body.supplier) role = await addEntity(RoleUser, { userId: user.id, roleId: 3 });
+      else role = await addEntity(RoleUser, { userId: user.id, roleId: 4 });
+
+      user.token = createToken({
         email: user.email,
         id: user.id,
-        phoneNumber: user.phoneNumber,
-        name: user.name,
-        role: user.role,
-        username: user.username
+        userName: user.userName,
+        roleId: role.roleId,
+        firstName: user.firstName,
+        verified: user.verified
       });
-      res.cookie('token', token, { maxAge: 70000000, httpOnly: true });
-      return successResponse(res, { token }, 201);
+      // TODO: uncomment for production
+      // const emailSent = await sendVerificationEmail(req, user);
+      // TODO: delete bottom line for production
+      // const emailSent = true;
+      res.cookie('token', user.token, { maxAge: 70000000, httpOnly: true });
+      // return successResponse(res, { user, role, emailSent }, 201);
     } catch (error) {
       errorResponse(res, { code: 500, message: error });
     }
