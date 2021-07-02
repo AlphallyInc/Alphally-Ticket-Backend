@@ -38,6 +38,7 @@
   "dependencies": {
     "@babel/polyfill": "^7.4.4",
     "@hapi/joi": "^15.1.1",
+    "@sendgrid/mail": "^7.4.5",
     "@types/hapi__joi": "^15.0.3",
     "bcryptjs": "^2.4.3",
     "chai": "^4.3.4",

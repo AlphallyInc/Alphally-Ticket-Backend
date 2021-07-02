@@ -25,12 +25,13 @@ const {
   forgetPassword,
   verifyForgetPasswordLink,
   setPassword,
-  logoutUser
+  logoutUser,
+  addRoles
 } = AuthController;
 
-router.post('/verifyNumber', verifyUser, registerPhoneNumber);
+// router.post('/verifyNumber', verifyUser, registerPhoneNumber);
 router.post('/verifyToken', validateTokenValue, verifyToken);
-router.post('/resendToken', verifyNumber, resendToken);
+// router.post('/resendToken', verifyNumber, resendToken);
 router.post('/signup', verifySignup, signup);
 router.post('/login', verifyLogin, login);
 router.patch('/updateProfile', authenticate, upload.single('file'), verifyProfile, updateProfile);
@@ -38,5 +39,8 @@ router.post('/forgetPassword', verifyNumber, forgetPassword);
 router.post('/verifyPasswordToken', validateTokenValue, verifyForgetPasswordLink);
 router.post('/setPassword', authenticate, verifyPasswordReset, setPassword);
 router.post('/logout', logoutUser);
+
+// super admin privilede
+router.post('/role', addRoles);
 
 export default router;

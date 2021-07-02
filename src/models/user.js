@@ -62,7 +62,7 @@ module.exports = (sequelize, DataTypes) => {
       },
       verificationId: {
         type: DataTypes.INTEGER,
-        allowNull: false,
+        allowNull: true,
         references: {
           model: 'Verification',
           key: 'id'
@@ -74,13 +74,9 @@ module.exports = (sequelize, DataTypes) => {
     {}
   );
   User.associate = (models) => {
-    User.belongsTo(models.Verification, {
-      as: 'verification',
-      foreignKey: 'verificationId'
-    });
-    User.hasOne(models.Role, {
-      through: 'RoleUsers',
-      as: 'role',
+    User.belongsToMany(models.Role, {
+      through: 'RoleUser',
+      as: 'roles',
       foreignKey: 'userId'
     });
     User.hasMany(models.Follower, {

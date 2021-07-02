@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 // import moment from 'moment';
 import { verifyPhoneNumber } from 'nigerian-phone-number-validator';
 import { AuthValidation } from '../validation';
@@ -92,6 +93,39 @@ const AuthMiddleware = {
     }
   },
 
+  // /**
+  //  * middleware for user signup
+  //  * @async
+  //  * @param {object} req - the api request
+  //  * @param {object} res - api response returned by method
+  //  * @param {object} next - returned values going into next function
+  //  * @returns {object} - returns error or response object
+  //  * @memberof AuthMiddleware
+  //  */
+  // async verifySignup(req, res, next) {
+  //   try {
+  //     const {
+  //       name, email, password, phoneNumber, username, role
+  //     } = req.body;
+  //     validateName({ name });
+  //     validateEmail({ email });
+  //     validatePassword({ password });
+  //     validateRole({ role });
+  //     if (!verifyPhoneNumber(phoneNumber)) return errorResponse(res, { code: 400, message: 'Phone Number is Invalid' });
+  //     const verification = await findByKey(Verification, { phoneNumber });
+  //     if (!verification) return errorResponse(res, { code: 409, message: 'User is not verified!' });
+  //     if (!verification.verified) return errorResponse(res, { code: 409, message: 'User is Not Yet verified!' });
+  //     const usernameUser = await findByKey(User, { username });
+  //     if (usernameUser) return errorResponse(res, { code: 409, message: 'This username is use by another user' });
+  //     const phoneNumberUser = await findByKey(User, { phoneNumber });
+  //     if (phoneNumberUser) return errorResponse(res, { code: 409, message: 'This phone number is use by another user' });
+  //     req.verification = verification;
+  //     next();
+  //   } catch (error) {
+  //     errorResponse(res, { code: 400, message: error });
+  //   }
+  // },
+
   /**
    * middleware for user signup
    * @async
@@ -104,21 +138,19 @@ const AuthMiddleware = {
   async verifySignup(req, res, next) {
     try {
       const {
-        name, email, password, phoneNumber, username, role
+        name, email, password, phoneNumber, dob, role
       } = req.body;
       validateName({ name });
       validateEmail({ email });
       validatePassword({ password });
       validateRole({ role });
-      if (!verifyPhoneNumber(phoneNumber)) return errorResponse(res, { code: 400, message: 'Phone Number is Invalid' });
-      const verification = await findByKey(Verification, { phoneNumber });
-      if (!verification) return errorResponse(res, { code: 409, message: 'User is not verified!' });
-      if (!verification.verified) return errorResponse(res, { code: 409, message: 'User is Not Yet verified!' });
-      const usernameUser = await findByKey(User, { username });
-      if (usernameUser) return errorResponse(res, { code: 409, message: 'This username is use by another user' });
-      const phoneNumberUser = await findByKey(User, { phoneNumber });
-      if (phoneNumberUser) return errorResponse(res, { code: 409, message: 'This phone number is use by another user' });
-      req.verification = verification;
+      verifyPhoneNumber(phoneNumber);
+      validateDOB({ dob });
+      const user = await findByKey(User, { email });
+      if (user) {
+        if (user.verificationId) return errorResponse(res, { code: 409, message: `User with email "${email}" already exists` });
+        req.user = user;
+      }
       next();
     } catch (error) {
       errorResponse(res, { code: 400, message: error });
@@ -136,10 +168,10 @@ const AuthMiddleware = {
    */
   async verifyLogin(req, res, next) {
     try {
-      const { password, phoneNumberOrUsername } = req.body;
+      const { password, email } = req.body;
       validatePassword({ password });
-      let user = await findByKey(User, { phoneNumber: phoneNumberOrUsername });
-      if (!user) user = await findByKey(User, { username: phoneNumberOrUsername });
+      validateEmail({ email });
+      const user = await findByKey(User, { email });
       if (!user) return errorResponse(res, { code: 409, message: 'Your details are either incorrect or invalid' });
       req.user = user;
       next();

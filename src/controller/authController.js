@@ -2,8 +2,10 @@
 /* eslint-disable no-empty-pattern */
 import { verifyPhoneNumber } from 'nigerian-phone-number-validator';
 import { GeneralService } from '../services';
-import { Toolbox, SMSLIER, FileUpload } from '../utils';
-import { AuthValidation } from '../validation';
+import {
+  Toolbox, SMSLIER, FileUpload, Mailer
+} from '../utils';
+// import { AuthValidation } from '../validation';
 import database from '../models';
 // import env from '../config/env';
 
@@ -16,9 +18,9 @@ const {
   comparePassword,
   // generateReffalCode
 } = Toolbox;
-const {
-  validateRefferalCode
-} = AuthValidation;
+// const {
+//   validateRefferalCode
+// } = AuthValidation;
 const {
   // sendVerificationToken
 } = SMSLIER;
@@ -26,13 +28,18 @@ const {
   uploadImages
 } = FileUpload;
 const {
+  sendVerificationEmail
+} = Mailer;
+const {
   addEntity,
   updateByKey,
   findByKey
 } = GeneralService;
 const {
   User,
-  Verification
+  Verification,
+  Role,
+  RoleUser
 } = database;
 // const {
 //   CLIENT_URL
@@ -102,14 +109,30 @@ const AuthController = {
    */
   async verifyToken(req, res) {
     try {
-      const { token, phoneNumber } = req.body;
-      if (!verifyPhoneNumber(phoneNumber)) return errorResponse(res, { code: 400, message: 'Phone Number is Invalid' });
-      const verification = await findByKey(Verification, { phoneNumber });
+      let user;
+      const { token } = req.body;
+      const verification = await findByKey(Verification, { token });
       if (!verification) return errorResponse(res, { code: 409, message: 'This Token does not exist.' });
-      if (verification.verified) return successResponse(res, { message: 'Phone Number is Already Verified' });
-      if (verification.token !== token) return errorResponse(res, { code: 409, message: 'Token is invalid' });
-      await updateByKey(Verification, { verified: true }, { phoneNumber });
-      return successResponse(res, { message: 'Phone Number Verification Successful' });
+      const { id, email, verified } = verification;
+      if (!verified) {
+        await updateByKey(Verification, { verified: true }, { token });
+        user = await updateByKey(User, { verificationId: id }, { email });
+      } else user = await updateByKey(User, { verificationId: id }, { email });
+
+      const role = await findByKey(RoleUser, { userId: user.id });
+      user.token = createToken({
+        email: user.email,
+        id: user.id,
+        roleId: role.roleId,
+        name: user.name,
+        verified: user.verified
+      });
+      // TODO: uncomment for production
+
+      // TODO: delete bottom line for production
+      // const emailSent = true;
+      res.cookie('token', user.token, { maxAge: 70000000, httpOnly: true });
+      return successResponse(res, { message: 'Email Verification Successful', user });
     } catch (error) {
       errorResponse(res, { code: 500, message: error });
     }
@@ -125,34 +148,42 @@ const AuthController = {
    */
   async signup(req, res) {
     try {
-      const body = {
-        firstName: req.body.firstName,
-        lastName: req.body.lastName,
-        userName: req.body.userName,
-        email: req.body.email,
-        password: hashPassword(req.body.password),
-        supplier: req.body.supplier,
-        companyTheme: req.body.companyTheme
-      };
-      const user = await addEntity(User, { ...body });
+      let user;
       let role;
-      if (req.body.supplier) role = await addEntity(RoleUser, { userId: user.id, roleId: 3 });
-      else role = await addEntity(RoleUser, { userId: user.id, roleId: 4 });
+      const {
+        name, email, dob, password, phoneNumber
+      } = req.body;
 
-      user.token = createToken({
-        email: user.email,
-        id: user.id,
-        userName: user.userName,
-        roleId: role.roleId,
-        firstName: user.firstName,
-        verified: user.verified
-      });
-      // TODO: uncomment for production
-      // const emailSent = await sendVerificationEmail(req, user);
-      // TODO: delete bottom line for production
-      // const emailSent = true;
-      res.cookie('token', user.token, { maxAge: 70000000, httpOnly: true });
-      // return successResponse(res, { user, role, emailSent }, 201);
+      const OTPToken = generateOTP();
+      const verification = await findByKey(Verification, { email });
+      if (verification) {
+        if (verification.verified) return errorResponse(res, { code: 409, message: 'Email is already verified' });
+        await updateByKey(Verification, { token: OTPToken }, { email });
+      } else await addEntity(Verification, { email, token: OTPToken });
+
+      const body = {
+        name,
+        email,
+        dob,
+        password: hashPassword(password),
+        phoneNumber
+      };
+
+      const emailSent = await sendVerificationEmail(body, OTPToken);
+
+      if (!req.user) {
+        user = await addEntity(User, { ...body });
+        const rolling = await findByKey(Role, { role: req.body.role.toLowerCase() });
+        role = await addEntity(RoleUser, { userId: user.id, roleId: rolling.id });
+      } else {
+        user = req.user;
+        role = await findByKey(RoleUser, { userId: user.id });
+        if (!role) {
+          const rolling = await findByKey(Role, { role: req.body.role.toLowerCase() });
+          role = await addEntity(RoleUser, { userId: user.id, roleId: rolling.id });
+        }
+      }
+      return successResponse(res, { user, role, emailSent }, 201);
     } catch (error) {
       errorResponse(res, { code: 500, message: error });
     }
@@ -171,12 +202,13 @@ const AuthController = {
       const { user } = req;
       const { password } = req.body;
       if (!comparePassword(password, user.password)) return errorResponse(res, { code: 401, message: 'incorrect password or email' });
+      const role = await findByKey(RoleUser, { userId: user.id });
       const token = createToken({
         email: user.email,
         id: user.id,
         phoneNumber: user.phoneNumber,
         name: user.name,
-        role: user.role,
+        roleId: role.roleId,
         username: user.username
       });
       res.cookie('token', token, { maxAge: 70000000, httpOnly: true });
@@ -312,6 +344,23 @@ const AuthController = {
       res.cookie('token', token, { maxAge: 0, httpOnly: true });
       return successResponse(res, { message: 'Logout Successful', token });
     } catch (error) {
+      errorResponse(res, {});
+    }
+  },
+
+  /**
+   * add roles to the appllication
+   * @param {object} req
+   * @param {object} res
+   * @returns {JSON} - a JSON response
+   * @memberof AuthController
+   */
+  async addRoles(req, res) {
+    try {
+      const roles = await Role.bulkCreate(req.body);
+      return successResponse(res, { message: 'Roles added Successful', roles });
+    } catch (error) {
+      console.error(error);
       errorResponse(res, {});
     }
   },

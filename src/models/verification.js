@@ -4,7 +4,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: true
     },
-    phoneNumber: {
+    email: {
       type: DataTypes.STRING,
       allowNull: false
     },
@@ -12,7 +12,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: false
-    }
+    },
   }, {});
   Verification.associate = (models) => {
     Verification.hasOne(models.User, {
