@@ -26,7 +26,8 @@ const {
 } = GeneralService;
 const {
   User,
-  Verification
+  Verification,
+  RoleUser
 } = database;
 
 const AuthMiddleware = {
@@ -60,13 +61,13 @@ const AuthMiddleware = {
    * @returns {object} - returns error or response object
    * @memberof AuthMiddleware
    */
-  async verifyNumber(req, res, next) {
+  async verifyEmail(req, res, next) {
     try {
-      if (req.body.phoneNumber) {
-        const { phoneNumber } = req.body;
-        if (!verifyPhoneNumber(phoneNumber)) return errorResponse(res, { code: 400, message: 'Phone Number is Invalid' });
-        const verification = await findByKey(Verification, { phoneNumber });
-        if (!verification) return errorResponse(res, { code: 409, message: 'This Number Does not Exist' });
+      if (req.body.email) {
+        const { email } = req.body;
+        validateEmail({ email });
+        const verification = await findByKey(Verification, { email });
+        if (!verification) return errorResponse(res, { code: 409, message: 'This Email Does not Exist' });
         req.verification = verification;
       }
       next();
@@ -260,7 +261,8 @@ const AuthMiddleware = {
         const { id } = req.tokenData;
         const user = await findByKey(User, { id });
         if (!user) return errorResponse(res, { code: 404, message: 'user in token does not exist' });
-        const permitted = permissions.includes(user.role);
+        const { roleId } = await findByKey(RoleUser, { userId: id });
+        const permitted = permissions.includes(roleId);
         if (!permitted) return errorResponse(res, { code: 403, message: 'Halt! You\'re not authorised' });
         next();
       } catch (error) {
