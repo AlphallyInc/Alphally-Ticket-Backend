@@ -87,13 +87,12 @@ const AuthController = {
       const { verification } = req;
       const OTPToken = generateOTP();
       await updateByKey(Verification, { token: OTPToken }, { id: verification.id });
+      const user = await findByKey(User, { email: req.body.email });
 
       // TODO - UNCOMMENT FOR PRODUCTION USE
       // Send the Token to User Via SMS
-      // const { phoneNumber } = verification;
-      // await sendVerificationToken(OTPToken, phoneNumber);
-
-      return successResponse(res, { message: 'Verification Token Sent', token: OTPToken });
+      await sendVerificationEmail(user, OTPToken);
+      return successResponse(res, { message: 'Verification Token Sent' });
     } catch (error) {
       errorResponse(res, { code: 500, message: error });
     }
@@ -262,16 +261,16 @@ const AuthController = {
    */
   async forgetPassword(req, res) {
     try {
-      const { phoneNumber } = req.body;
+      const { email } = req.body;
       const { verification } = req;
       const OTPToken = generateOTP();
-      if (!verification.verified) return errorResponse(res, { code: 409, message: 'Phone Number is not yet verified' });
-      await updateByKey(Verification, { token: OTPToken }, { phoneNumber });
+      if (!verification.verified) return errorResponse(res, { code: 409, message: 'Email is not yet verified' });
+      await updateByKey(Verification, { token: OTPToken }, { email });
+      const user = await findByKey(User, { email: req.body.email });
 
       // TODO - UNCOMMENT FOR PRODUCTION USE
       // Send the Token to User Via SMS
-      // await sendVerificationToken(OTPToken, phoneNumber);
-
+      await sendVerificationEmail(user, OTPToken);
       return successResponse(res, { message: 'Verification Reset Link Sent to your number', token: OTPToken });
     } catch (error) {
       errorResponse(res, {});
@@ -289,21 +288,23 @@ const AuthController = {
     try {
       const { token } = req.body;
       const verification = await findByKey(Verification, { token });
-      if (verification) {
-        const user = await findByKey(User, { phoneNumber: verification.phoneNumber });
-        user.token = createToken({
-          email: user.email,
-          name: user.name,
-          id: user.id,
-          phoneNumber: user.phoneNumber
-        });
-        res.cookie('token', user.token, { maxAge: 70000000, httpOnly: true });
-        const url = `${req.protocol}s://${req.get('host')}/v1.0/api/auth/set-password`;
-        return successResponse(res, { message: `success, redirect to api route ${url} with password objects`, token: user.token });
+      if (!verification) return errorResponse(res, { code: 409, message: 'Token is not valid' });
+      const user = await findByKey(User, { email: verification.email });
+      const role = await findByKey(RoleUser, { userId: user.id });
+      user.token = createToken({
+        email: user.email,
+        id: user.id,
+        phoneNumber: user.phoneNumber,
+        name: user.name,
+        roleId: role.roleId,
+        username: user.username
+      });
+      res.cookie('token', user.token, { maxAge: 70000000, httpOnly: true });
+      const url = `${req.protocol}s://${req.get('host')}/v1.0/api/auth/set-password`;
+      return successResponse(res, { message: `success, redirect to api route ${url} with password objects`, token: user.token });
 
-        // TODO - UNCOMMENT FOR PRODUCTION USE
-        // return res.redirect(`${CLIENT_URL}/set-password?token=${token}`);
-      }
+      // TODO - UNCOMMENT FOR PRODUCTION USE
+      // return res.redirect(`${CLIENT_URL}/set-password?token=${token}`);
     } catch (error) {
       const status = error.status || 500;
       errorResponse(res, { code: status, message: `could not verify, ${error.message}` });
@@ -360,7 +361,6 @@ const AuthController = {
       const roles = await Role.bulkCreate(req.body);
       return successResponse(res, { message: 'Roles added Successful', roles });
     } catch (error) {
-      console.error(error);
       errorResponse(res, {});
     }
   },
