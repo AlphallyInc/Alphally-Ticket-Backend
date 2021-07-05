@@ -33,7 +33,8 @@ const {
 const {
   addEntity,
   updateByKey,
-  findByKey
+  findByKey,
+  allEntities
 } = GeneralService;
 const {
   User,
@@ -359,6 +360,22 @@ const AuthController = {
   async addRoles(req, res) {
     try {
       const roles = await Role.bulkCreate(req.body);
+      return successResponse(res, { message: 'Roles added Successful', roles });
+    } catch (error) {
+      errorResponse(res, {});
+    }
+  },
+
+  /**
+   * get all roles to the appllication
+   * @param {object} req
+   * @param {object} res
+   * @returns {JSON} - a JSON response
+   * @memberof AuthController
+   */
+  async getRoles(req, res) {
+    try {
+      const roles = await allEntities(Role);
       return successResponse(res, { message: 'Roles added Successful', roles });
     } catch (error) {
       errorResponse(res, {});

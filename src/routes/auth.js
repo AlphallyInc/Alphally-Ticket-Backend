@@ -26,7 +26,8 @@ const {
   verifyForgetPasswordLink,
   setPassword,
   logoutUser,
-  addRoles
+  addRoles,
+  getRoles
 } = AuthController;
 
 // router.post('/verifyNumber', verifyUser, registerPhoneNumber);
@@ -42,5 +43,6 @@ router.post('/logout', logoutUser);
 
 // super admin privilede
 router.post('/role', addRoles);
+router.get('/roles', getRoles);
 
 export default router;
