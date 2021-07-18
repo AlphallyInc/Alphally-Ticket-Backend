@@ -83,7 +83,7 @@ module.exports = (sequelize, DataTypes) => {
     postId: {
       type: DataTypes.INTEGER,
       allowNull: true,
-    },
+    }
   }, {});
   Event.associate = () => {
   };

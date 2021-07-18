@@ -100,11 +100,49 @@ const MovieController = {
   async deleteMovie(req, res) {
     try {
       const { movie } = req;
-      const { postId } = movie;
-      const { id } = req.movie;
+      const { postId, id } = movie;
       if (postId !== null) await deleteByKey(Post, { id: postId });
       await deleteByKey(Movie, { id });
       return successResponse(res, { message: 'Movie Added Successfully' });
+    } catch (error) {
+      errorResponse(res, { code: 500, message: error });
+    }
+  },
+
+  /**
+   * update a movie and a post
+   * @async
+   * @param {object} req
+   * @param {object} res
+   * @returns {JSON} a JSON response with user details and Token
+   * @memberof MovieController
+   */
+  async updateMovie(req, res) {
+    try {
+      const { movie } = req;
+      const moviee = await updateByKey({ ...req.body }, { id: movie.id });
+      return successResponse(res, { message: 'Movie updated Successfully', moviee });
+    } catch (error) {
+      errorResponse(res, { code: 500, message: error });
+    }
+  },
+
+  /**
+   * get a movie and a post
+   * @async
+   * @param {object} req
+   * @param {object} res
+   * @returns {JSON} a JSON response with user details and Token
+   * @memberof MovieController
+   */
+  async getgovie(req, res) {
+    try {
+      let movieData;
+      const { id, privacyId } = req.query;
+      if (id) movieData = await getMovieByKey({ id });
+      else if (privacyId) movieData = await getMovieByKey({ privacyId });
+      else movieData = await getMovieByKey({});
+      return successResponse(res, { message: 'Post Gotten Successfully', movieData });
     } catch (error) {
       errorResponse(res, { code: 500, message: error });
     }

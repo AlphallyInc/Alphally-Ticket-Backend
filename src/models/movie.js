@@ -78,6 +78,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: true,
     },
+    trendingCount: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    },
   }, {});
   Movie.associate = () => {
   };
