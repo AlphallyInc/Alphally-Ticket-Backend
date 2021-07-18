@@ -1,7 +1,7 @@
 /* eslint-disable import/extensions */
 import { Router } from 'express';
 import { Bouncers, MovieMiddleware } from '../middlewares';
-import { AdminController } from '../controller';
+import { MovieController } from '../controller';
 
 const router = Router();
 const {
@@ -11,12 +11,10 @@ const {
 const {
   verifyMoviePayload
 } = MovieMiddleware;
-// const {
-//   addPrivacyAll,
-//   addPrivacy,
-//   deletePrivacy,
-// } = AdminController;
+const {
+  addMovie
+} = MovieController;
 
-router.post('/', userBouncers, verifyMoviePayload);
+router.post('/', userBouncers, verifyMoviePayload, addMovie);
 
 export default router;

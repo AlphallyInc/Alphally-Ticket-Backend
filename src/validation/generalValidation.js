@@ -164,7 +164,12 @@ const GeneralValidation = {
       shareLink: joi.string().uri().label('Please a valid and shareable link  '),
       duration: joi.string().alphanum().required().label("Please duration should be for example '90 minutes' to be valid"),
       privacyId: joi.number().integer().positive().label('Please a valid privacy value'),
-      cinemaId: joi.number().integer().positive().label('Please a valid cinema'),
+      cinemaIds: joi.array().items(joi.number().positive().required()).label('Please a valid cinema address'),
+      post: joi.object({
+        title: joi.string().label('Please a valid post title'),
+        body: joi.string().min(3).label('Please input a valid post description'),
+        privacyId: joi.number().integer().positive().label('Please a valid privacy value')
+      }).label('Please add a post details for this movie')
     };
     const { error } = joi.validate({ ...payload }, schema);
     if (error) throw error.details[0].context.label;

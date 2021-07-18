@@ -1,10 +1,11 @@
 import { GeneralService } from '../services';
-import { Toolbox } from '../utils';
+import { Toolbox, Helpers } from '../utils';
 import database from '../models';
 
 const {
   successResponse,
   errorResponse,
+  mergeImageVideoUrls
 } = Toolbox;
 const {
   addEntity,
@@ -13,14 +14,20 @@ const {
   rowCountByKey,
   allEntities
 } = GeneralService;
+const {
+  uploadAllImages,
+  uploadAllVideos
+} = Helpers;
 // const {
 //   getUserProfile
 // } = UserService;
 const {
-  User,
-  Follower,
+  PostMedia,
+  MovieMedia,
   Movie,
+  Post,
   Media,
+  MovieCinema
 } = database;
 
 const MovieController = {
@@ -37,6 +44,9 @@ const MovieController = {
       let mediaPayload;
       let media;
       const { id } = req.tokenData;
+      const postBody = req.body.post;
+      const { cinemaIds } = req.body;
+      delete req.body.post;
       if (req.files.length) {
         let imageMediaPayload;
         let videoMediaPayload;
@@ -59,11 +69,18 @@ const MovieController = {
         mediaPayload = imageMediaPayload.concat(videoMediaPayload);
         media = await Media.bulkCreate(mediaPayload);
       }
-      const post = await addEntity(Post, { ...req.body, userId: id });
-      const mediaPostPayload = media.map((item) => ({ mediaId: item.id, postId: post.id }));
-      const mediaPost = await PostMedia.bulkCreate(mediaPostPayload);
+      const movie = await addEntity(Movie, { ...req.body, userId: id });
+      const movieCinemaPayload = cinemaIds.map((item) => ({ movieId: movie.id, cinemaId: item }));
+      await MovieCinema.bulkCreate(movieCinemaPayload);
+      const mediaMoviePayload = media.map((item) => ({ mediaId: item.id, movieId: movie.id }));
+      const mediaMovie = await MovieMedia.bulkCreate(mediaMoviePayload);
+      if (movie && mediaMovie) {
+        const post = await addEntity(Post, { ...postBody, userId: id, movieId: movie.id });
+        const mediaPostPayload = media.map((item) => ({ mediaId: item.id, postId: post.id }));
+        await PostMedia.bulkCreate(mediaPostPayload);
+      }
       return successResponse(res, {
-        message: 'Post Added Successfully', post, media, mediaPost
+        message: 'Post Added Successfully', movie, media, mediaMovie
       });
     } catch (error) {
       errorResponse(res, { code: 500, message: error });
