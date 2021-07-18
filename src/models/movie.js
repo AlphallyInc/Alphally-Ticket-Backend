@@ -83,7 +83,30 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: true
     },
   }, {});
-  Movie.associate = () => {
+  Movie.associate = (models) => {
+    Movie.belongsTo(models.User, {
+      as: 'publisher',
+      foreignKey: 'userId'
+    });
+    Movie.belongsToMany(models.Media, {
+      through: 'MovieMedia',
+      as: 'medias',
+      foreignKey: 'movieId'
+    });
+    Movie.belongsToMany(models.Genre, {
+      through: 'MovieGenre',
+      as: 'genres',
+      foreignKey: 'movieId'
+    });
+    Movie.hasMany(models.MovieMedia, {
+      as: 'media',
+      foreignKey: 'movieId'
+    });
+    Movie.belongsToMany(models.Cinema, {
+      through: 'MovieCinema',
+      as: 'cinemas',
+      foreignKey: 'movieId'
+    });
   };
   return Movie;
 };

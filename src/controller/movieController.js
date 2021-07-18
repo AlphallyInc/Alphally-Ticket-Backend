@@ -1,4 +1,4 @@
-import { GeneralService } from '../services';
+import { GeneralService, MovieService } from '../services';
 import { Toolbox, Helpers } from '../utils';
 import database from '../models';
 
@@ -12,23 +12,24 @@ const {
   updateByKey,
   findByKey,
   deleteByKey,
-  rowCountByKey,
   allEntities
 } = GeneralService;
 const {
   uploadAllImages,
   uploadAllVideos
 } = Helpers;
-// const {
-//   getUserProfile
-// } = UserService;
+const {
+  getMovieByKey
+} = MovieService;
 const {
   PostMedia,
   MovieMedia,
   Movie,
   Post,
   Media,
-  MovieCinema
+  MovieCinema,
+  MovieGenre,
+  Genre
 } = database;
 
 const MovieController = {
@@ -46,8 +47,10 @@ const MovieController = {
       let media;
       const { id } = req.tokenData;
       const postBody = req.body.post;
-      const { cinemaIds } = req.body;
+      const { cinemaIds, genreIds } = req.body;
       delete req.body.post;
+      delete req.body.cinemaIds;
+      delete req.body.genreIds;
       if (req.files.length) {
         let imageMediaPayload;
         let videoMediaPayload;
@@ -73,6 +76,8 @@ const MovieController = {
       const movie = await addEntity(Movie, { ...req.body, userId: id });
       const movieCinemaPayload = cinemaIds.map((item) => ({ movieId: movie.id, cinemaId: item }));
       await MovieCinema.bulkCreate(movieCinemaPayload);
+      const movieGenrePayload = genreIds.map((item) => ({ movieId: movie.id, genreId: item }));
+      await MovieGenre.bulkCreate(movieGenrePayload);
       const mediaMoviePayload = media.map((item) => ({ mediaId: item.id, movieId: movie.id }));
       const mediaMovie = await MovieMedia.bulkCreate(mediaMoviePayload);
       if (movie && mediaMovie) {
@@ -90,7 +95,81 @@ const MovieController = {
   },
 
   /**
-   * delet a movie and a post
+   * add genres
+   * @async
+   * @param {object} req
+   * @param {object} res
+   * @returns {JSON} a JSON response with user details and Token
+   * @memberof MovieController
+   */
+  async addGenre(req, res) {
+    try {
+      const genres = await Genre.bulkCreate(req.body.genres);
+      return successResponse(res, { message: 'Genres Added Successfully', genres });
+    } catch (error) {
+      errorResponse(res, { code: 500, message: error });
+    }
+  },
+
+  /**
+   * update genres
+   * @async
+   * @param {object} req
+   * @param {object} res
+   * @returns {JSON} a JSON response with user details and Token
+   * @memberof MovieController
+   */
+  async updateGenre(req, res) {
+    try {
+      const { id } = req.query;
+      let genre = await findByKey(Genre, { id });
+      if (!genre) return errorResponse(res, { code: 404, message: 'Genre does not exist' });
+      genre = await updateByKey(Genre, { name: req.body.genre }, { id });
+      return successResponse(res, { message: 'Genres Added Successfully', genre });
+    } catch (error) {
+      errorResponse(res, { code: 500, message: error });
+    }
+  },
+
+  /**
+   * delete genres
+   * @async
+   * @param {object} req
+   * @param {object} res
+   * @returns {JSON} a JSON response with user details and Token
+   * @memberof MovieController
+   */
+  async deleteGenre(req, res) {
+    try {
+      const { id } = req.query;
+      const genre = await findByKey(Genre, { id });
+      if (!genre) return errorResponse(res, { code: 404, message: 'Genre does not exist' });
+      await deleteByKey(Genre, { id });
+      return successResponse(res, { message: 'Genres Deleted Successfully' });
+    } catch (error) {
+      errorResponse(res, { code: 500, message: error });
+    }
+  },
+
+  /**
+   * get all genres
+   * @async
+   * @param {object} req
+   * @param {object} res
+   * @returns {JSON} a JSON response with user details and Token
+   * @memberof MovieController
+   */
+  async getGenres(req, res) {
+    try {
+      const genres = await allEntities(Genre);
+      return successResponse(res, { message: 'Genres Gotten Successfully', genres });
+    } catch (error) {
+      errorResponse(res, { code: 500, message: error });
+    }
+  },
+
+  /**
+   * delete a movie and a post
    * @async
    * @param {object} req
    * @param {object} res
@@ -135,7 +214,7 @@ const MovieController = {
    * @returns {JSON} a JSON response with user details and Token
    * @memberof MovieController
    */
-  async getgovie(req, res) {
+  async getMovie(req, res) {
     try {
       let movieData;
       const { id, privacyId } = req.query;

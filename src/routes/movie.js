@@ -13,10 +13,23 @@ const {
   verifyMovie
 } = MovieMiddleware;
 const {
-  addMovie
+  addMovie,
+  deleteMovie,
+  updateMovie,
+  getMovie,
+  addGenre,
+  updateGenre,
+  deleteGenre,
+  getGenres
 } = MovieController;
 
 router.post('/', userBouncers, verifyMoviePayload, addMovie);
-router.patch('/', userBouncers, verifyMovie, addMovie);
+router.patch('/', userBouncers, verifyMovie, updateMovie);
+router.delete('/', userBouncers, verifyMovie, deleteMovie);
+router.get('/', userBouncers, verifyMovie, getMovie);
+router.post('/', adminBouncers, addGenre);
+router.patch('/', adminBouncers, updateGenre);
+router.patch('/', adminBouncers, deleteGenre);
+router.patch('/', userBouncers, getGenres);
 
 export default router;

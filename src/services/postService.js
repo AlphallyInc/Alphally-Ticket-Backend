@@ -25,7 +25,7 @@ const PostService = {
         include: [
           {
             model: User,
-            as: 'author',
+            as: 'publisher',
             attributes: ['id', 'name', 'username', 'imageUrl'],
           },
           {

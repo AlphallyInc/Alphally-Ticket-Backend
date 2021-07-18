@@ -68,7 +68,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {});
   Post.associate = (models) => {
     Post.belongsTo(models.User, {
-      as: 'author',
+      as: 'publisher',
       foreignKey: 'userId'
     });
     Post.belongsToMany(models.Media, {
