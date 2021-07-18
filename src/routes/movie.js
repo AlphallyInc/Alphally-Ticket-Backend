@@ -9,12 +9,14 @@ const {
   adminBouncers
 } = Bouncers;
 const {
-  verifyMoviePayload
+  verifyMoviePayload,
+  verifyMovie
 } = MovieMiddleware;
 const {
   addMovie
 } = MovieController;
 
 router.post('/', userBouncers, verifyMoviePayload, addMovie);
+router.patch('/', userBouncers, verifyMovie, addMovie);
 
 export default router;

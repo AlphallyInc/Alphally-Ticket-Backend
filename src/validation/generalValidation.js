@@ -47,6 +47,12 @@ const GeneralValidation = {
       ).label('Please a valid cinema address'),
       city: joi.string().min(3).max(25).label('Please input a city name'),
       country: joi.valid(countries).label('Please country must be capitalized'),
+      cinemaIds: joi.array().items(joi.number().positive()).label('Please a valid cinema address'),
+      post: joi.object({
+        title: joi.string().label('Please a valid post title'),
+        body: joi.string().min(3).label('Please input a valid post description'),
+        privacyId: joi.number().integer().positive().label('Please a valid privacy value')
+      }).label('Please add a post details for this movie')
     };
     const { error } = joi.validate({ ...payload }, schema);
     if (error) throw error.details[0].context.label;

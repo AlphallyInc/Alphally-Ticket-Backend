@@ -74,6 +74,10 @@ module.exports = (sequelize, DataTypes) => {
       onUpdate: 'CASCADE',
       onDelete: 'CASCADE'
     },
+    postId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
   }, {});
   Movie.associate = () => {
   };

@@ -9,6 +9,7 @@ const {
 } = Toolbox;
 const {
   addEntity,
+  updateByKey,
   findByKey,
   deleteByKey,
   rowCountByKey,
@@ -32,7 +33,7 @@ const {
 
 const MovieController = {
   /**
-   * follow and follow user
+   * add a movie and a post
    * @async
    * @param {object} req
    * @param {object} res
@@ -78,10 +79,32 @@ const MovieController = {
         const post = await addEntity(Post, { ...postBody, userId: id, movieId: movie.id });
         const mediaPostPayload = media.map((item) => ({ mediaId: item.id, postId: post.id }));
         await PostMedia.bulkCreate(mediaPostPayload);
+        await updateByKey(Movie, { postId: post.id }, { id: movie.id });
       }
       return successResponse(res, {
         message: 'Post Added Successfully', movie, media, mediaMovie
       });
+    } catch (error) {
+      errorResponse(res, { code: 500, message: error });
+    }
+  },
+
+  /**
+   * delet a movie and a post
+   * @async
+   * @param {object} req
+   * @param {object} res
+   * @returns {JSON} a JSON response with user details and Token
+   * @memberof MovieController
+   */
+  async deleteMovie(req, res) {
+    try {
+      const { movie } = req;
+      const { postId } = movie;
+      const { id } = req.movie;
+      if (postId !== null) await deleteByKey(Post, { id: postId });
+      await deleteByKey(Movie, { id });
+      return successResponse(res, { message: 'Movie Added Successfully' });
     } catch (error) {
       errorResponse(res, { code: 500, message: error });
     }

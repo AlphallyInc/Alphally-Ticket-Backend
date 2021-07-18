@@ -9,6 +9,7 @@ const {
 const {
   validateMovie,
   validateId,
+  validateParameters,
   validateComment
 } = GeneralValidation;
 const {
@@ -16,7 +17,8 @@ const {
 } = GeneralService;
 const {
   Post,
-  Comment
+  Comment,
+  Movie
 } = database;
 
 const MovieMiddleware = {
@@ -39,7 +41,7 @@ const MovieMiddleware = {
   },
 
   /**
-   * middleware validating post payload
+   * middleware validating movie payload
    * @async
    * @param {object} req - the api request
    * @param {object} res - api response returned by method
@@ -47,19 +49,16 @@ const MovieMiddleware = {
    * @returns {object} - returns error or response object
    * @memberof MovieMiddleware
    */
-  async verifyPostID(req, res, next) {
+  async verifyMovie(req, res, next) {
     try {
-      if (req.query.id) {
-        validateId({ id: req.query.id });
-        const post = await findByKey(Post, { id: req.query.id });
-        if (!post) return errorResponse(res, { code: 404, message: 'Post is Not Found' });
+      if (req.query.id || req.query.movieId) {
+        const id = req.query.id || req.query.movieId;
+        validateId({ id });
+        const movie = await findByKey(Movie, { id });
+        if (!movie) return errorResponse(res, { code: 404, message: 'Movie is Not Found' });
+        req.movie = movie;
       }
-      if (req.body.postId) {
-        validateId({ id: req.query.postId });
-        validateComment({ ...req.body });
-        const post = await findByKey(Post, { id: req.query.postId });
-        if (!post) return errorResponse(res, { code: 404, message: 'Post is Not Found' });
-      }
+      if (req.body) validateParameters(req.body);
       next();
     } catch (error) {
       errorResponse(res, { code: 400, message: error });
