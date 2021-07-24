@@ -15,6 +15,7 @@ const {
 } = PostMiddleware;
 const {
   addPost,
+  addMedia,
   deletePost,
   getPost,
   addPostComment,
@@ -27,6 +28,7 @@ const {
 } = PostController;
 
 router.post('/', userBouncers, upload.array('media'), verifyPost, addPost);
+router.post('/media', userBouncers, upload.array('media'), addMedia);
 router.delete('/', userBouncers, verifyPostID, deletePost); // ?id=[]
 router.get('/', userBouncers, verifyPostID, getPost); // ?id=[]&isPublished=[]
 router.get('/comment', userBouncers, getComments); // ?postId

@@ -110,8 +110,13 @@ const GeneralValidation = {
   validatePost(payload) {
     const schema = {
       title: joi.string().required().label('Please a valid post title'),
+      isPublished: joi.bool().label('isPublished must be a boolean value'),
       body: joi.string().required().label('Please a valid post message'),
       privacyId: joi.number().positive().label('Please a valid privacy id'),
+      thumbnailId: joi.number().positive().required().label('Please add a valid thumbnail id'),
+      mediaId: joi.array().items(
+        joi.number().positive().required().label('Please add valid media id')
+      ).label('Media must be an array of picture id'),
     };
     const { error } = joi.validate({ ...payload }, schema);
     if (error) throw error.details[0].context.label;
