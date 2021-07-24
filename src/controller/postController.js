@@ -45,10 +45,13 @@ const PostController = {
    */
   async addPost(req, res) {
     try {
-      let mediaPayload;
+      let mediaPayload = [];
       let media;
+      let post;
+      let mediaPostPayload;
+      let mediaPost;
       const { id } = req.tokenData;
-      if (req.files.length) {
+      if (req.files && req.files.length) {
         let imageMediaPayload;
         let videoMediaPayload;
         const fullMediaPayload = req.files.map((item) => ({
@@ -69,13 +72,63 @@ const PostController = {
         }
         mediaPayload = imageMediaPayload.concat(videoMediaPayload);
         media = await Media.bulkCreate(mediaPayload);
+        post = await addEntity(Post, { ...req.body, userId: id });
+        mediaPostPayload = media.map((item) => ({ mediaId: item.id, postId: post.id }));
+        mediaPost = await PostMedia.bulkCreate(mediaPostPayload);
+      } else {
+        post = await addEntity(Post, { ...req.body, userId: id });
+        if (req.body.mediaId) {
+          if (req.body.thumbnailId) mediaPayload.push({ mediaId: req.body.thumbnailId, postId: post.id });
+          mediaPostPayload = req.body.mediaId.map((item) => ({ mediaId: item, postId: post.id }));
+          mediaPostPayload = mediaPayload.concat(mediaPostPayload);
+          mediaPost = await PostMedia.bulkCreate(mediaPostPayload);
+        }
       }
-      const post = await addEntity(Post, { ...req.body, userId: id });
-      const mediaPostPayload = media.map((item) => ({ mediaId: item.id, postId: post.id }));
-      const mediaPost = await PostMedia.bulkCreate(mediaPostPayload);
       return successResponse(res, {
         message: 'Post Added Successfully', post, media, mediaPost
       });
+    } catch (error) {
+      errorResponse(res, { code: 500, message: error });
+    }
+  },
+
+  /**
+   * all media
+   * @async
+   * @param {object} req
+   * @param {object} res
+   * @returns {JSON} a JSON response with user details and Token
+   * @memberof PostController
+   */
+  async addMedia(req, res) {
+    try {
+      let mediaPayload;
+      let media;
+      const { id } = req.tokenData;
+      if (req.files.length) {
+        let imageMediaPayload = [];
+        let videoMediaPayload = [];
+        const fullMediaPayload = req.files.map((item) => ({
+          type: item.mimetype.split('/')[0],
+          fileExtension: item.mimetype.split('/')[1],
+          userId: id,
+          fileName: item.originalname
+        }));
+        const imagePayload = req.files.filter((item) => item.mimetype.split('/')[0].toLowerCase() === 'image');
+        const videoPayload = req.files.filter((item) => item.mimetype.split('/')[0].toLowerCase() === 'video');
+        if (imagePayload.length > 0) {
+          const imageUrls = await uploadAllImages(imagePayload);
+          imageMediaPayload = mergeImageVideoUrls(fullMediaPayload, imageUrls);
+        }
+        if (videoPayload.length > 0) {
+          const videoUrls = await uploadAllVideos(videoPayload);
+          videoMediaPayload = mergeImageVideoUrls(fullMediaPayload, videoUrls);
+        }
+        mediaPayload = imageMediaPayload.concat(videoMediaPayload);
+        media = await Media.bulkCreate(mediaPayload);
+        // console.log(media);
+      }
+      return successResponse(res, { message: 'Media Added Successfully', media });
     } catch (error) {
       errorResponse(res, { code: 500, message: error });
     }
