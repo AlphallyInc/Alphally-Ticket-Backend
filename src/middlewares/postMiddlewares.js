@@ -12,11 +12,14 @@ const {
   validateComment
 } = GeneralValidation;
 const {
-  findByKey
+  findByKey,
+  findMultipleByKey,
 } = GeneralService;
 const {
   Post,
-  Comment
+  Media,
+  Comment,
+  Privacy
 } = database;
 
 const PostMiddleware = {
@@ -31,7 +34,23 @@ const PostMiddleware = {
    */
   async verifyPost(req, res, next) {
     try {
+      let privacy;
+      let media;
+      let thumbnail;
       validatePost(req.body);
+      if (req.body.privacyId) {
+        privacy = await findByKey(Privacy, { id: req.body.privacyId });
+        if (!privacy) return errorResponse(res, { code: 404, message: 'Privacy is not found' });
+      }
+      if (req.body.thumbnailId) {
+        thumbnail = await findByKey(Media, { id: req.body.thumbnailId });
+        if (!thumbnail) return errorResponse(res, { code: 404, message: 'Thumbnail is not found' });
+      }
+      if (req.body.mediaId) {
+        media = await findMultipleByKey(Media, { id: req.body.mediaId });
+        if (!media) return errorResponse(res, { code: 404, message: 'Media is not found' });
+        if (media.length !== req.body.mediaId.length) return errorResponse(res, { code: 404, message: 'One or more media id is invalid' });
+      }
       next();
     } catch (error) {
       errorResponse(res, { code: 400, message: error });
