@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 // import moment from 'moment';
 import { verifyPhoneNumber } from 'nigerian-phone-number-validator';
 import { AuthValidation } from '../validation';
@@ -17,14 +18,16 @@ const {
   validateToken,
   validateUsername,
   validateDOB,
-  validateGender
+  validateGender,
+  validateRole
 } = AuthValidation;
 const {
   findByKey
 } = GeneralService;
 const {
   User,
-  Verification
+  Verification,
+  RoleUser
 } = database;
 
 const AuthMiddleware = {
@@ -58,13 +61,13 @@ const AuthMiddleware = {
    * @returns {object} - returns error or response object
    * @memberof AuthMiddleware
    */
-  async verifyNumber(req, res, next) {
+  async verifyEmail(req, res, next) {
     try {
-      if (req.body.phoneNumber) {
-        const { phoneNumber } = req.body;
-        if (!verifyPhoneNumber(phoneNumber)) return errorResponse(res, { code: 400, message: 'Phone Number is Invalid' });
-        const verification = await findByKey(Verification, { phoneNumber });
-        if (!verification) return errorResponse(res, { code: 409, message: 'This Number Does not Exist' });
+      if (req.body.email) {
+        const { email } = req.body;
+        validateEmail({ email });
+        const verification = await findByKey(Verification, { email });
+        if (!verification) return errorResponse(res, { code: 409, message: 'This Email Does not Exist' });
         req.verification = verification;
       }
       next();
@@ -91,6 +94,39 @@ const AuthMiddleware = {
     }
   },
 
+  // /**
+  //  * middleware for user signup
+  //  * @async
+  //  * @param {object} req - the api request
+  //  * @param {object} res - api response returned by method
+  //  * @param {object} next - returned values going into next function
+  //  * @returns {object} - returns error or response object
+  //  * @memberof AuthMiddleware
+  //  */
+  // async verifySignup(req, res, next) {
+  //   try {
+  //     const {
+  //       name, email, password, phoneNumber, username, role
+  //     } = req.body;
+  //     validateName({ name });
+  //     validateEmail({ email });
+  //     validatePassword({ password });
+  //     validateRole({ role });
+  //     if (!verifyPhoneNumber(phoneNumber)) return errorResponse(res, { code: 400, message: 'Phone Number is Invalid' });
+  //     const verification = await findByKey(Verification, { phoneNumber });
+  //     if (!verification) return errorResponse(res, { code: 409, message: 'User is not verified!' });
+  //     if (!verification.verified) return errorResponse(res, { code: 409, message: 'User is Not Yet verified!' });
+  //     const usernameUser = await findByKey(User, { username });
+  //     if (usernameUser) return errorResponse(res, { code: 409, message: 'This username is use by another user' });
+  //     const phoneNumberUser = await findByKey(User, { phoneNumber });
+  //     if (phoneNumberUser) return errorResponse(res, { code: 409, message: 'This phone number is use by another user' });
+  //     req.verification = verification;
+  //     next();
+  //   } catch (error) {
+  //     errorResponse(res, { code: 400, message: error });
+  //   }
+  // },
+
   /**
    * middleware for user signup
    * @async
@@ -103,18 +139,19 @@ const AuthMiddleware = {
   async verifySignup(req, res, next) {
     try {
       const {
-        name, email, password, phoneNumber, username
+        name, email, password, phoneNumber, dob, role
       } = req.body;
       validateName({ name });
       validateEmail({ email });
       validatePassword({ password });
-      if (!verifyPhoneNumber(phoneNumber)) return errorResponse(res, { code: 400, message: 'Phone Number is Invalid' });
-      const verification = await findByKey(Verification, { phoneNumber });
-      if (!verification) return errorResponse(res, { code: 409, message: 'User is not verified!' });
-      if (!verification.verified) return errorResponse(res, { code: 409, message: 'User is Not Yet verified!' });
-      const usernameUser = await findByKey(User, { username });
-      if (usernameUser) return errorResponse(res, { code: 409, message: 'This username is use by another user' });
-      req.verification = verification;
+      validateRole({ role });
+      verifyPhoneNumber(phoneNumber);
+      validateDOB({ dob });
+      const user = await findByKey(User, { email });
+      if (user) {
+        if (user.verificationId) return errorResponse(res, { code: 409, message: `User with email "${email}" already exists` });
+        req.user = user;
+      }
       next();
     } catch (error) {
       errorResponse(res, { code: 400, message: error });
@@ -132,12 +169,10 @@ const AuthMiddleware = {
    */
   async verifyLogin(req, res, next) {
     try {
-      const { password, phoneNumberOrUsername } = req.body;
+      const { password, email } = req.body;
       validatePassword({ password });
-      // eslint-disable-next-line max-len
-      // if (!verifyPhoneNumber(phoneNumber)) return errorResponse(res, { code: 400, message: 'Phone Number is Invalid' });
-      let user = await findByKey(User, { phoneNumber: phoneNumberOrUsername });
-      if (!user) user = await findByKey(User, { username: phoneNumberOrUsername });
+      validateEmail({ email });
+      const user = await findByKey(User, { email });
       if (!user) return errorResponse(res, { code: 409, message: 'Your details are either incorrect or invalid' });
       req.user = user;
       next();
@@ -212,6 +247,28 @@ const AuthMiddleware = {
     } catch (error) {
       errorResponse(res, {});
     }
+  },
+
+  /**
+   * verify user role
+   * @param {array} permissions - array with role id's permitted on route
+   * @returns {function} - returns an async functon
+   * @memberof AuthMiddleware
+   */
+  verifyRoles(permissions) {
+    return async function bar(req, res, next) {
+      try {
+        const { id } = req.tokenData;
+        const user = await findByKey(User, { id });
+        if (!user) return errorResponse(res, { code: 404, message: 'user in token does not exist' });
+        const { roleId } = await findByKey(RoleUser, { userId: id });
+        const permitted = permissions.includes(roleId);
+        if (!permitted) return errorResponse(res, { code: 403, message: 'Halt! You\'re not authorised' });
+        next();
+      } catch (error) {
+        errorResponse(res, {});
+      }
+    };
   },
 };
 

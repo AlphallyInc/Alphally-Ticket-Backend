@@ -1,6 +1,6 @@
 export default {
-  super_admin: ['super_admin'],
-  admin: ['super_admin', 'admin'],
-  business: ['super_admin', 'admin', 'business'],
-  user: ['super_admin', 'admin', 'business', 'user'],
+  superAdmin: [1],
+  admin: [1, 2],
+  business: [1, 2, 3],
+  user: [1, 2, 3, 4],
 };

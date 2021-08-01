@@ -27,7 +27,7 @@ const AuthValidation = {
    */
   validateToken(payload) {
     const schema = {
-      token: joi.string().min(7).required()
+      token: joi.string().min(4).required()
         .label('Please input a valid token number'),
     };
     const { error } = joi.validate({ ...payload }, schema);
@@ -93,7 +93,7 @@ const AuthValidation = {
    */
   validateDOB(payload) {
     const schema = {
-      dob: joi.string().required().label('Please add a valid date of birth')
+      dob: joi.date().required().label('Please add a valid date of birth')
     };
     const { error } = joi.validate({ ...payload }, schema);
     if (error) throw error.details[0].context.label;
@@ -110,6 +110,22 @@ const AuthValidation = {
   validateGender(payload) {
     const schema = {
       gender: joi.string().required().valid('male', 'female', 'MALE', 'FEMALE', 'Male', 'Female').label('Please add a valid gender')
+    };
+    const { error } = joi.validate({ ...payload }, schema);
+    if (error) throw error.details[0].context.label;
+    return true;
+  },
+
+  /**
+   * validate ROLE
+   * @function
+   * @param {object} payload - user object
+   * @returns {object | boolean} - returns a boolean or an error object
+   * @memberof AuthValidation
+   */
+  validateRole(payload) {
+    const schema = {
+      role: joi.string().required().valid('admin', 'user', 'superadmin', 'business', 'eventmanager', 'cinemamanager', 'ticketManager').label('Please add a valid role')
     };
     const { error } = joi.validate({ ...payload }, schema);
     if (error) throw error.details[0].context.label;

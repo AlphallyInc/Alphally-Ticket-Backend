@@ -39,7 +39,7 @@ module.exports = {
       allowNull: true
     },
     role: {
-      type: Sequelize.ENUM('admin', 'user', 'super_admin', 'business', 'eventmanager', 'cinemamanager', 'ticketManager'),
+      type: Sequelize.STRING,
       allowNull: false,
       defaultValue: 'user'
     },
@@ -66,7 +66,7 @@ module.exports = {
     },
     verificationId: {
       type: Sequelize.INTEGER,
-      allowNull: false,
+      allowNull: true,
       references: {
         model: 'Verifications',
         key: 'id'

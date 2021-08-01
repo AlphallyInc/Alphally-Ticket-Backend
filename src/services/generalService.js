@@ -136,6 +136,24 @@ const GeneralService = {
     }
   },
 
+  /**
+   *returns the counts of a Table
+   * @async
+   * @param {object} model - database model
+   * @param {object} keys - query key to decrement
+   * @returns {promise-object | error} A promise object with entity detail
+   * @memberof GeneralService
+   */
+  async rowCountByKey(model, keys) {
+    try {
+      const entities = await model.findAndCountAll({ returning: true, where: keys });
+      if (!entities) throw new ApiError(404, 'Not Found');
+      return entities;
+    } catch (error) {
+      throw new Error(error);
+    }
+  },
+
 };
 
 export default GeneralService;

@@ -1,10 +1,17 @@
+/* eslint-disable max-len */
+/* eslint-disable valid-jsdoc */
 /* eslint-disable linebreak-style */
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import joi from '@hapi/joi';
 import env from '../config/env';
 import ApiError from './apiError';
+import FileUpload from './fileUpload';
 
+const {
+  uploadVideo,
+  uploadImages
+} = FileUpload;
 const { SECRET } = env;
 
 /**
@@ -140,7 +147,7 @@ export default class Toolbox {
       bearerToken = authorization.split(' ')[1]
         ? authorization.split(' ')[1] : authorization;
     }
-    return cookieToken || bearerToken || req.headers['x-access-token'] || req.headers.token || req.body.token;
+    return bearerToken || cookieToken || req.headers['x-access-token'] || req.headers.token || req.body.token;
   }
 
   /**
@@ -150,9 +157,10 @@ export default class Toolbox {
    * @memberof Toolbox
    */
   static generateOTP() {
-    const randomNumber = Math.floor(Math.random() * 899 + 100);
-    const anotherRandomNumber = Math.floor(Math.random() * 8999 + 1000);
-    const reference = `${randomNumber}${anotherRandomNumber}`;
+    const randomNumber = Math.floor(Math.random() * 69 + 39);
+    const anotherRandomNumber = Math.floor(Math.random() * 79 + 10);
+    let reference = `${randomNumber}${anotherRandomNumber}`;
+    if (reference.toString().length > 4) reference = reference.slice(0, 4);
     return reference;
   }
 
@@ -164,9 +172,85 @@ export default class Toolbox {
    * @memberof Toolbox
    */
   static generateReffalCode(name) {
-    const randomNumber = Math.floor(Math.random() * 899 + 100);
-    const anotherRandomNumber = Math.floor(Math.random() * 899 + 100);
+    const randomNumber = Math.floor(Math.random() * 89 + 99);
+    const anotherRandomNumber = Math.floor(Math.random() * 79 + 10);
     const reference = `ref_${name}${randomNumber}${anotherRandomNumber}`;
     return reference;
+  }
+
+  /**
+   * generates a ticketCode
+   * @static
+   * @param {string} name - name of the movie of event
+   * @returns {string} reference - A unique referral code
+   * @memberof Toolbox
+   */
+  static generateTicketCode(name) {
+    const matches = name.match(/\b(\w)/g); // ['J','S','O','N']
+    const acronym = matches.join(''); // JSON
+    const randomNumber = Math.floor(Math.random() * 8999 + 9999);
+    const anotherRandomNumber = Math.floor(Math.random() * 8999 + 1000);
+    const reference = `${acronym}_${name}${randomNumber}${anotherRandomNumber}`;
+    return reference;
+  }
+
+  /**
+   * upload video by recursion
+   * @static
+   * @param {array} mediaPayload - array of images to be uploaded
+   * @param {array} mediaUrls - array of images to be uploaded
+   * @returns {array} url - array of images urls uploaded
+   * @memberof Toolbox
+   */
+  static mergeImageVideoUrls(mediaPayload, mediaUrls) {
+    const result = [];
+    mediaUrls.forEach((item) => {
+      mediaPayload.forEach(({
+        type, fileExtension, userId, fileName
+      }) => {
+        if (item.fileName === fileName) {
+          result.push({
+            type, fileExtension, userId, name: fileName, url: item.url
+          });
+        }
+      });
+    });
+
+    return result;
+  }
+
+  /**
+   * upload video by recursion
+   * @static
+   * @param {array} bodyAddress - array of images to be uploaded
+   * @param {array} databaseAddress - array of images to be uploaded
+   * @returns {array} url - array of images urls uploaded
+   * @memberof Toolbox
+   */
+  static getCinemaPayload(bodyAddress, databaseAddress, currentPayload = [], newPayload = []) {
+    if (bodyAddress.length < 1) return { currentPayload, newPayload };
+
+    const [singleBodyAddress] = bodyAddress;
+    const {
+      address, city, seats, state, country
+    } = singleBodyAddress;
+    if (databaseAddress.length > 0) {
+      const singleDatabaseAddress = databaseAddress[0];
+      currentPayload.push({
+        id: singleDatabaseAddress.id,
+        address: address || singleDatabaseAddress.address,
+        city: city || singleDatabaseAddress.city,
+        seats: seats || singleDatabaseAddress.seats,
+        state: state || singleDatabaseAddress.state,
+        country: country || singleDatabaseAddress.country,
+        cinemaId: singleDatabaseAddress.cinemaId
+      });
+    } else {
+      newPayload.push({
+        address, city, seats, state, country
+      });
+    }
+
+    return Toolbox.getCinemaPayload(bodyAddress.slice(1), databaseAddress.slice(1), currentPayload, newPayload);
   }
 }

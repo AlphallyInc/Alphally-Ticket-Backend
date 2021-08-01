@@ -1,6 +1,7 @@
-/* eslint-disable import/prefer-default-export */
+import GeneralValidation from './generalValidation';
 import AuthValidation from './authValidation';
 
 export {
-  AuthValidation
+  AuthValidation,
+  GeneralValidation
 };
