@@ -1,4 +1,4 @@
-import { GeneralService } from '../services';
+import { GeneralService, UserService } from '../services';
 import { Toolbox } from '../utils';
 import database from '../models';
 
@@ -13,9 +13,9 @@ const {
   rowCountByKey,
   allEntities
 } = GeneralService;
-// const {
-//   getUserProfile
-// } = UserService;
+const {
+  getMedias
+} = UserService;
 const {
   User,
   Follower,
@@ -67,6 +67,25 @@ const UserController = {
       user = { ...user.dataValues, followers: followersData.count, following: followingData.count };
       return successResponse(res, { message: 'Profile Successfully', user });
     } catch (error) {
+      errorResponse(res, { code: 500, message: error });
+    }
+  },
+
+  /**
+   * get user profile medias
+   * @async
+   * @param {object} req
+   * @param {object} res
+   * @returns {JSON} a JSON response with user details and Token
+   * @memberof UserController
+   */
+  async getProfileMedia(req, res) {
+    try {
+      const { id } = req.tokenData;
+      const media = await getMedias({ userId: id });
+      return successResponse(res, { message: 'Profile Successfully', media });
+    } catch (error) {
+      console.error(error);
       errorResponse(res, { code: 500, message: error });
     }
   },

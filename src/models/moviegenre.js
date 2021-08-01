@@ -1,5 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
-  const MovieMedia = sequelize.define('MovieMedia', {
+  const MovieGenre = sequelize.define('MovieGenre', {
     movieId: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -10,26 +10,18 @@ module.exports = (sequelize, DataTypes) => {
       onUpdate: 'CASCADE',
       onDelete: 'CASCADE'
     },
-    mediaId: {
+    genreId: {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: 'Media',
+        model: 'Genre',
         key: 'id'
       },
       onUpdate: 'CASCADE',
       onDelete: 'CASCADE'
     },
   }, {});
-  MovieMedia.associate = (models) => {
-    MovieMedia.belongsTo(models.Movie, {
-      as: 'movie',
-      foreignKey: 'movieId'
-    });
-    MovieMedia.belongsTo(models.Media, {
-      as: 'media',
-      foreignKey: 'mediaId'
-    });
+  MovieGenre.associate = () => {
   };
-  return MovieMedia;
+  return MovieGenre;
 };

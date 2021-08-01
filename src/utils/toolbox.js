@@ -179,6 +179,22 @@ export default class Toolbox {
   }
 
   /**
+   * generates a ticketCode
+   * @static
+   * @param {string} name - name of the movie of event
+   * @returns {string} reference - A unique referral code
+   * @memberof Toolbox
+   */
+  static generateTicketCode(name) {
+    const matches = name.match(/\b(\w)/g); // ['J','S','O','N']
+    const acronym = matches.join(''); // JSON
+    const randomNumber = Math.floor(Math.random() * 8999 + 9999);
+    const anotherRandomNumber = Math.floor(Math.random() * 8999 + 1000);
+    const reference = `${acronym}_${name}${randomNumber}${anotherRandomNumber}`;
+    return reference;
+  }
+
+  /**
    * upload video by recursion
    * @static
    * @param {array} mediaPayload - array of images to be uploaded
