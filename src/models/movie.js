@@ -54,16 +54,6 @@ module.exports = (sequelize, DataTypes) => {
       onUpdate: 'CASCADE',
       onDelete: 'CASCADE'
     },
-    cinemaId: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-      references: {
-        model: 'Cinema',
-        key: 'id'
-      },
-      onUpdate: 'CASCADE',
-      onDelete: 'CASCADE'
-    },
     privacyId: {
       type: DataTypes.INTEGER,
       allowNull: true,

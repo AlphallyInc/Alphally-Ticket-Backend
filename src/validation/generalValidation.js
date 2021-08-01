@@ -168,7 +168,7 @@ const GeneralValidation = {
       discount: joi.number().precision(2).label('Please a valid discount, it\'s percentage should be presented in at most 2 decimal pllaces'),
       ticketPrice: joi.number().positive().required().label('Please a valid movie ticket price'),
       shareLink: joi.string().uri().label('Please a valid and shareable link  '),
-      duration: joi.string().alphanum().required().label("Please duration should be for example '90 minutes' to be valid"),
+      duration: joi.string().required().label("Please duration should be for example '90 minutes' to be valid"),
       privacyId: joi.number().integer().positive().label('Please a valid privacy value'),
       cinemaIds: joi.array().items(joi.number().positive().required()).label('Please a valid cinema address'),
       genreIds: joi.array().items(joi.number().positive().required()).label('Please a valid genres'),

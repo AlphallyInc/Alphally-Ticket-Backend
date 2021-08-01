@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import { GeneralService, MovieService } from '../services';
 import { Toolbox, Helpers } from '../utils';
 import database from '../models';
@@ -44,6 +45,7 @@ const MovieController = {
   async addMovie(req, res) {
     try {
       let mediaPayload;
+      let thumbnailMedia;
       let media;
       const { id } = req.tokenData;
       const postBody = req.body.post;
@@ -51,7 +53,7 @@ const MovieController = {
       delete req.body.post;
       delete req.body.cinemaIds;
       delete req.body.genreIds;
-      if (req.files.length) {
+      if (req.files && req.files.length) {
         let imageMediaPayload;
         let videoMediaPayload;
         const fullMediaPayload = req.files.map((item) => ({
@@ -72,24 +74,36 @@ const MovieController = {
         }
         mediaPayload = imageMediaPayload.concat(videoMediaPayload);
         media = await Media.bulkCreate(mediaPayload);
+      } else if (req.body.mediaId) {
+        if (req.body.thumbnailId) {
+          thumbnailMedia = req.body.mediaId.unshift(req.body.thumbnailId);
+        }
+        media = req.body.mediaId;
       }
+      return console.log(media);
+      // return console.log(req.body);
       const movie = await addEntity(Movie, { ...req.body, userId: id });
-      const movieCinemaPayload = cinemaIds.map((item) => ({ movieId: movie.id, cinemaId: item }));
+      const movieCinemaPayload = cinemaIds.map((item) => ({ movieId: movie.id, cinemaId: Number(item) }));
       await MovieCinema.bulkCreate(movieCinemaPayload);
-      const movieGenrePayload = genreIds.map((item) => ({ movieId: movie.id, genreId: item }));
+      const movieGenrePayload = genreIds.map((item) => ({ movieId: movie.id, genreId: Number(item) }));
+      console.log(movieGenrePayload);
       await MovieGenre.bulkCreate(movieGenrePayload);
-      const mediaMoviePayload = media.map((item) => ({ mediaId: item.id, movieId: movie.id }));
+     
+      const mediaMoviePayload = media.map((item) => ({ mediaId: Number(item), movieId: movie.id }));
       const mediaMovie = await MovieMedia.bulkCreate(mediaMoviePayload);
       if (movie && mediaMovie) {
-        const post = await addEntity(Post, { ...postBody, userId: id, movieId: movie.id });
-        const mediaPostPayload = media.map((item) => ({ mediaId: item.id, postId: post.id }));
-        await PostMedia.bulkCreate(mediaPostPayload);
-        await updateByKey(Movie, { postId: post.id }, { id: movie.id });
+        if (postBody) {
+          const post = await addEntity(Post, { ...postBody, userId: id, movieId: movie.id });
+          const mediaPostPayload = media.map((item) => ({ mediaId: Number(item), postId: post.id }));
+          await PostMedia.bulkCreate(mediaPostPayload);
+          await updateByKey(Movie, { postId: post.id }, { id: movie.id });
+        }
       }
       return successResponse(res, {
         message: 'Post Added Successfully', movie, media, mediaMovie
       });
     } catch (error) {
+      console.error(error);
       errorResponse(res, { code: 500, message: error });
     }
   },
@@ -124,7 +138,7 @@ const MovieController = {
       const { id } = req.query;
       let genre = await findByKey(Genre, { id });
       if (!genre) return errorResponse(res, { code: 404, message: 'Genre does not exist' });
-      genre = await updateByKey(Genre, { name: req.body.genre }, { id });
+      genre = await updateByKey(Genre, { name: req.body.name }, { id });
       return successResponse(res, { message: 'Genres Added Successfully', genre });
     } catch (error) {
       errorResponse(res, { code: 500, message: error });
@@ -147,6 +161,7 @@ const MovieController = {
       await deleteByKey(Genre, { id });
       return successResponse(res, { message: 'Genres Deleted Successfully' });
     } catch (error) {
+      console.error(error);
       errorResponse(res, { code: 500, message: error });
     }
   },

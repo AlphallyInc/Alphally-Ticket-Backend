@@ -26,6 +26,11 @@ module.exports = (sequelize, DataTypes) => {
       as: 'addresses',
       foreignKey: 'cinemaId',
     });
+    Cinema.belongsToMany(models.Movie, {
+      through: 'MovieCinema',
+      as: 'cinemas',
+      foreignKey: 'cinemaId'
+    });
   };
   return Cinema;
 };

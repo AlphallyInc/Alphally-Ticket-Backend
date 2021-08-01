@@ -6,6 +6,7 @@ import { AdminController } from '../controller';
 const router = Router();
 const {
   adminBouncers,
+  userBouncers
 } = Bouncers;
 const {
   verifyPrivacy,
@@ -35,7 +36,7 @@ router.post('/cinema', adminBouncers, verifyCinemaPayload, addCinema);
 router.patch('/cinema', adminBouncers, verifyCinema, updateAllCinemaDetails); // id=[]
 router.patch('/cinema/name', adminBouncers, verifyCinema, updateCinemaName); // id=[]
 router.delete('/cinema', adminBouncers, verifyCinema, deleteCinema); // id=[]
-router.get('/cinema', adminBouncers, verifyCinema, getAllCinema); // id=[]
+router.get('/cinema', userBouncers, verifyCinema, getAllCinema); // id=[]
 router.patch('/cinema/single', adminBouncers, verifyCinema, updateSingleDetails); // id=[]&cinenmaAdressId
 router.post('/cinema/single', adminBouncers, verifyCinema, addSingleAddressToCinema); // id=[]
 

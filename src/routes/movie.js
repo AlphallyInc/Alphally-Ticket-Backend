@@ -27,9 +27,9 @@ router.post('/', userBouncers, verifyMoviePayload, addMovie);
 router.patch('/', userBouncers, verifyMovie, updateMovie);
 router.delete('/', userBouncers, verifyMovie, deleteMovie);
 router.get('/', userBouncers, verifyMovie, getMovie);
-router.post('/', adminBouncers, addGenre);
-router.patch('/', adminBouncers, updateGenre);
-router.patch('/', adminBouncers, deleteGenre);
-router.patch('/', userBouncers, getGenres);
+router.post('/genre', adminBouncers, addGenre);
+router.patch('/genre', adminBouncers, updateGenre);
+router.delete('/genre', adminBouncers, deleteGenre);
+router.get('/genre', userBouncers, getGenres);
 
 export default router;

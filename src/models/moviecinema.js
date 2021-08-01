@@ -1,5 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
-  const MovieMedia = sequelize.define('MovieCinema', {
+  const MovieCinema = sequelize.define('MovieCinema', {
     movieId: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -21,7 +21,7 @@ module.exports = (sequelize, DataTypes) => {
       onDelete: 'CASCADE'
     },
   }, {});
-  MovieMedia.associate = () => {
+  MovieCinema.associate = () => {
   };
-  return MovieMedia;
+  return MovieCinema;
 };
