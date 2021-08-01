@@ -171,6 +171,7 @@ const GeneralValidation = {
       duration: joi.string().required().label("Please duration should be for example '90 minutes' to be valid"),
       privacyId: joi.number().integer().positive().label('Please a valid privacy value'),
       cinemaIds: joi.array().items(joi.number().positive().required()).label('Please a valid cinema address'),
+      mediaIds: joi.array().items(joi.number().positive().required()).label('Please a valid media Ids'),
       genreIds: joi.array().items(joi.number().positive().required()).label('Please a valid genres'),
       post: joi.object({
         title: joi.string().label('Please a valid post title'),

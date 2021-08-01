@@ -74,21 +74,18 @@ const MovieController = {
         }
         mediaPayload = imageMediaPayload.concat(videoMediaPayload);
         media = await Media.bulkCreate(mediaPayload);
-      } else if (req.body.mediaId) {
+      } else if (req.body.mediaIds) {
         if (req.body.thumbnailId) {
-          thumbnailMedia = req.body.mediaId.unshift(req.body.thumbnailId);
+          thumbnailMedia = req.body.mediaIds.unshift(req.body.thumbnailId);
         }
-        media = req.body.mediaId;
+        media = req.body.mediaIds;
       }
-      return console.log(media);
       // return console.log(req.body);
       const movie = await addEntity(Movie, { ...req.body, userId: id });
       const movieCinemaPayload = cinemaIds.map((item) => ({ movieId: movie.id, cinemaId: Number(item) }));
       await MovieCinema.bulkCreate(movieCinemaPayload);
       const movieGenrePayload = genreIds.map((item) => ({ movieId: movie.id, genreId: Number(item) }));
-      console.log(movieGenrePayload);
       await MovieGenre.bulkCreate(movieGenrePayload);
-     
       const mediaMoviePayload = media.map((item) => ({ mediaId: Number(item), movieId: movie.id }));
       const mediaMovie = await MovieMedia.bulkCreate(mediaMoviePayload);
       if (movie && mediaMovie) {
@@ -103,7 +100,6 @@ const MovieController = {
         message: 'Post Added Successfully', movie, media, mediaMovie
       });
     } catch (error) {
-      console.error(error);
       errorResponse(res, { code: 500, message: error });
     }
   },

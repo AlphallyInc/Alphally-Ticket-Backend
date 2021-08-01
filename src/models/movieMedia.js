@@ -24,7 +24,7 @@ module.exports = (sequelize, DataTypes) => {
   MovieMedia.associate = (models) => {
     MovieMedia.belongsTo(models.Movie, {
       as: 'movie',
-      foreignKey: 'postId'
+      foreignKey: 'movieId'
     });
     MovieMedia.belongsTo(models.Media, {
       as: 'media',
