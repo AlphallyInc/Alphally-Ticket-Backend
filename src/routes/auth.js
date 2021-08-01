@@ -6,7 +6,7 @@ import upload from '../middlewares/uploadMiddleware';
 
 const router = Router();
 const {
-  verifyNumber,
+  verifyEmail,
   verifyUser,
   verifySignup,
   verifyLogin,
@@ -25,18 +25,24 @@ const {
   forgetPassword,
   verifyForgetPasswordLink,
   setPassword,
-  logoutUser
+  logoutUser,
+  addRoles,
+  getRoles
 } = AuthController;
 
-router.post('/verifyNumber', verifyUser, registerPhoneNumber);
+// router.post('/verifyNumber', verifyUser, registerPhoneNumber);
 router.post('/verifyToken', validateTokenValue, verifyToken);
-router.post('/resendToken', verifyNumber, resendToken);
+router.post('/resendToken', verifyEmail, resendToken);
 router.post('/signup', verifySignup, signup);
 router.post('/login', verifyLogin, login);
 router.patch('/updateProfile', authenticate, upload.single('file'), verifyProfile, updateProfile);
-router.post('/forgetPassword', verifyNumber, forgetPassword);
+router.post('/forgetPassword', verifyEmail, forgetPassword);
 router.post('/verifyPasswordToken', validateTokenValue, verifyForgetPasswordLink);
 router.post('/setPassword', authenticate, verifyPasswordReset, setPassword);
 router.post('/logout', logoutUser);
+
+// super admin privilede
+router.post('/role', addRoles);
+router.get('/roles', getRoles);
 
 export default router;

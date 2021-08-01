@@ -21,7 +21,15 @@ module.exports = (sequelize, DataTypes) => {
       onDelete: 'CASCADE'
     },
   }, {});
-  MovieMedia.associate = () => {
+  MovieMedia.associate = (models) => {
+    MovieMedia.belongsTo(models.Movie, {
+      as: 'movie',
+      foreignKey: 'movieId'
+    });
+    MovieMedia.belongsTo(models.Media, {
+      as: 'media',
+      foreignKey: 'mediaId'
+    });
   };
   return MovieMedia;
 };

@@ -1,3 +1,5 @@
+/* eslint-disable max-len */
+/* eslint-disable valid-jsdoc */
 /* eslint-disable linebreak-style */
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
@@ -177,6 +179,22 @@ export default class Toolbox {
   }
 
   /**
+   * generates a ticketCode
+   * @static
+   * @param {string} name - name of the movie of event
+   * @returns {string} reference - A unique referral code
+   * @memberof Toolbox
+   */
+  static generateTicketCode(name) {
+    const matches = name.match(/\b(\w)/g); // ['J','S','O','N']
+    const acronym = matches.join(''); // JSON
+    const randomNumber = Math.floor(Math.random() * 8999 + 9999);
+    const anotherRandomNumber = Math.floor(Math.random() * 8999 + 1000);
+    const reference = `${acronym}_${name}${randomNumber}${anotherRandomNumber}`;
+    return reference;
+  }
+
+  /**
    * upload video by recursion
    * @static
    * @param {array} mediaPayload - array of images to be uploaded
@@ -199,5 +217,40 @@ export default class Toolbox {
     });
 
     return result;
+  }
+
+  /**
+   * upload video by recursion
+   * @static
+   * @param {array} bodyAddress - array of images to be uploaded
+   * @param {array} databaseAddress - array of images to be uploaded
+   * @returns {array} url - array of images urls uploaded
+   * @memberof Toolbox
+   */
+  static getCinemaPayload(bodyAddress, databaseAddress, currentPayload = [], newPayload = []) {
+    if (bodyAddress.length < 1) return { currentPayload, newPayload };
+
+    const [singleBodyAddress] = bodyAddress;
+    const {
+      address, city, seats, state, country
+    } = singleBodyAddress;
+    if (databaseAddress.length > 0) {
+      const singleDatabaseAddress = databaseAddress[0];
+      currentPayload.push({
+        id: singleDatabaseAddress.id,
+        address: address || singleDatabaseAddress.address,
+        city: city || singleDatabaseAddress.city,
+        seats: seats || singleDatabaseAddress.seats,
+        state: state || singleDatabaseAddress.state,
+        country: country || singleDatabaseAddress.country,
+        cinemaId: singleDatabaseAddress.cinemaId
+      });
+    } else {
+      newPayload.push({
+        address, city, seats, state, country
+      });
+    }
+
+    return Toolbox.getCinemaPayload(bodyAddress.slice(1), databaseAddress.slice(1), currentPayload, newPayload);
   }
 }

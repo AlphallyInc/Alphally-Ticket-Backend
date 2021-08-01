@@ -31,11 +31,31 @@ module.exports = (sequelize, DataTypes) => {
       onDelete: 'CASCADE'
     },
     comment: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT,
       allowNull: false
     },
   }, {});
-  Comment.associate = () => {
+  Comment.associate = (models) => {
+    Comment.belongsTo(models.User, {
+      as: 'commenter',
+      foreignKey: 'userId'
+    });
+    Comment.belongsTo(models.Post, {
+      as: 'post',
+      foreignKey: 'postId'
+    });
+    Comment.hasMany(models.Comment, {
+      as: 'replyComments',
+      foreignKey: 'parentId'
+    });
+    Comment.hasMany(models.CommentLike, {
+      as: 'likes',
+      foreignKey: 'commentId'
+    });
+    Comment.belongsTo(models.Comment, {
+      as: 'replyComment',
+      foreignKey: 'parentId'
+    });
   };
   return Comment;
 };

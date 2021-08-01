@@ -1,5 +1,3 @@
-const postMedia = require("./postMedia");
-
 module.exports = (sequelize, DataTypes) => {
   const Post = sequelize.define('Post', {
     title: {
@@ -70,8 +68,16 @@ module.exports = (sequelize, DataTypes) => {
   }, {});
   Post.associate = (models) => {
     Post.belongsTo(models.User, {
-      as: 'author',
+      as: 'publisher',
       foreignKey: 'userId'
+    });
+    Post.belongsTo(models.Movie, {
+      as: 'movie',
+      foreignKey: 'movieId'
+    });
+    Post.belongsTo(models.Privacy, {
+      as: 'privacy',
+      foreignKey: 'privacyId'
     });
     Post.belongsToMany(models.Media, {
       through: 'PostMedia',
@@ -82,6 +88,23 @@ module.exports = (sequelize, DataTypes) => {
       as: 'medias',
       foreignKey: 'postId'
     });
+    Post.hasMany(models.Comment, {
+      as: 'comments',
+      foreignKey: 'postId'
+    });
+    Post.hasMany(models.Like, {
+      as: 'likes',
+      foreignKey: 'postId'
+    });
+    Post.hasMany(models.PostSeen, {
+      as: 'seen',
+      foreignKey: 'postId'
+    });
+    // Post.belongsToMany(models.User, {
+    //   through: 'Comment',
+    //   as: 'commenters',
+    //   foreignKey: 'postId'
+    // });
   };
   return Post;
 };

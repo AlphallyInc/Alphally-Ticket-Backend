@@ -20,6 +20,15 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: true
     },
+    numberOfTickets: {
+      type: DataTypes.DOUBLE,
+      allowNull: true
+    },
+    isAvialable: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValues: true
+    },
     discount: {
       type: DataTypes.STRING,
       allowNull: true
@@ -54,16 +63,6 @@ module.exports = (sequelize, DataTypes) => {
       onUpdate: 'CASCADE',
       onDelete: 'CASCADE'
     },
-    cinemaId: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-      references: {
-        model: 'Cinema',
-        key: 'id'
-      },
-      onUpdate: 'CASCADE',
-      onDelete: 'CASCADE'
-    },
     privacyId: {
       type: DataTypes.INTEGER,
       allowNull: true,
@@ -74,8 +73,39 @@ module.exports = (sequelize, DataTypes) => {
       onUpdate: 'CASCADE',
       onDelete: 'CASCADE'
     },
+    postId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+    trendingCount: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    },
   }, {});
-  Movie.associate = () => {
+  Movie.associate = (models) => {
+    Movie.belongsTo(models.User, {
+      as: 'publisher',
+      foreignKey: 'userId'
+    });
+    Movie.belongsToMany(models.Media, {
+      through: 'MovieMedia',
+      as: 'medias',
+      foreignKey: 'movieId'
+    });
+    Movie.belongsToMany(models.Genre, {
+      through: 'MovieGenre',
+      as: 'genres',
+      foreignKey: 'movieId'
+    });
+    Movie.hasMany(models.MovieMedia, {
+      as: 'media',
+      foreignKey: 'movieId'
+    });
+    Movie.belongsToMany(models.Cinema, {
+      through: 'MovieCinema',
+      as: 'cinemas',
+      foreignKey: 'movieId'
+    });
   };
   return Movie;
 };
