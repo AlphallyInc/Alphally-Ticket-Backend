@@ -152,6 +152,7 @@ const PostController = {
         if (!seeenpost) { await addEntity(PostSeen, { postId: req.query.id, userId: req.tokenData.id }); }
       } else if (isPublished) postData = await getPostByKey({ isPublished });
       else postData = await getPostByKey({});
+      return console.log(postData);
       // eslint-disable-next-line max-len
       postData = await postData.map((item) => ({
         ...item.dataValues,

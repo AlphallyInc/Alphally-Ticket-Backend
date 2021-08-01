@@ -8,7 +8,8 @@ const {
   Comment,
   PostSeen,
   PostMedia,
-  CommentLike
+  CommentLike,
+  Movie
 } = database;
 
 const PostService = {
