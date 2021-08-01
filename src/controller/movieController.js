@@ -80,7 +80,9 @@ const MovieController = {
         }
         media = req.body.mediaIds;
       }
-      // return console.log(req.body);
+      if (!req.body.numberOfTickets) req.body.isAvialable = false;
+      else if (req.body.numberOfTickets <= 0) req.body.isAvialable = false;
+      else req.body.isAvialable = true;
       const movie = await addEntity(Movie, { ...req.body, userId: id });
       const movieCinemaPayload = cinemaIds.map((item) => ({ movieId: movie.id, cinemaId: Number(item) }));
       await MovieCinema.bulkCreate(movieCinemaPayload);
@@ -210,7 +212,7 @@ const MovieController = {
   async updateMovie(req, res) {
     try {
       const { movie } = req;
-      const moviee = await updateByKey({ ...req.body }, { id: movie.id });
+      const moviee = await updateByKey(Movie, { ...req.body }, { id: movie.id });
       return successResponse(res, { message: 'Movie updated Successfully', moviee });
     } catch (error) {
       errorResponse(res, { code: 500, message: error });

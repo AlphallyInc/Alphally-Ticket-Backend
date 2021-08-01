@@ -20,6 +20,15 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: true
     },
+    numberOfTickets: {
+      type: DataTypes.DOUBLE,
+      allowNull: true
+    },
+    isAvialable: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValues: true
+    },
     discount: {
       type: DataTypes.STRING,
       allowNull: true
