@@ -202,6 +202,22 @@ const GeneralValidation = {
     if (error) throw error.details[0].context.label;
     return true;
   },
+
+  /**
+   * validate tickets payload
+   * @param {object} payload - user object
+   * @returns {object | boolean} - returns a boolean or an error object
+   * @memberof GeneralValidation
+   */
+  validateTickets(payload) {
+    const schema = {
+      movieId: joi.number().positive().label('Please a valid movie id'),
+      quantity: joi.number().required().label('Please a valid quantity of tickets')
+    };
+    const { error } = joi.validate({ ...payload }, schema);
+    if (error) throw error.details[0].context.label;
+    return true;
+  },
 };
 
 export default GeneralValidation;
