@@ -1,3 +1,4 @@
+import qrCode from 'qrcode';
 import { GeneralService, UserService } from '../services';
 import { Toolbox, Payment } from '../utils';
 import database from '../models';
@@ -8,11 +9,12 @@ const {
   generateTicketCode
 } = Toolbox;
 const {
-  viaPaystack
+  viaPaystack,
+  validatePaystack
 } = Payment;
 const {
   addEntity,
- updateByKey
+  updateByKey
 } = GeneralService;
 const {
   getMedias
@@ -41,6 +43,40 @@ const TicketController = {
         ...req.body, userId: id, price, ticketCode
       });
       return successResponse(res, { message: 'Tickets Purchased Successfully', ticket });
+    } catch (error) {
+      console.error(error);
+      errorResponse(res, { code: 500, message: error });
+    }
+  },
+
+  /**
+   * verify a movie ticket
+   * @async
+   * @param {object} req
+   * @param {object} res
+   * @returns {JSON} a JSON response with user details and Token
+   * @memberof TicketController
+   */
+  async verifyPayment(req, res) {
+    try {
+      let barCode;
+      const { name } = req.tokenData;
+      const { ticket } = req;
+      const { paystackReference, ticketCode, quantity } = ticket;
+      if (!paystackReference || paystackReference === null) return errorResponse(res, { code: '400', message: 'Payment has not be made yet' });
+      const check = await validatePaystack(paystackReference);
+      const { status } = check.data;
+      if (status === 'abandoned') return errorResponse(res, { code: '400', message: 'Error with Payment, Please Try again!' });
+      if (status === 'failed') return errorResponse(res, { code: '400', message: 'Payment Failed, Please Try again!' });
+      if (status === 'success') {
+        const metadata = {
+          ticketCode,
+          quantity,
+          name
+        };
+        barCode = await qrCode.toDataURL(JSON.stringify(metadata));
+      }
+      return successResponse(res, { message: 'Ticket Payment Successfully', barCode });
     } catch (error) {
       console.error(error);
       errorResponse(res, { code: 500, message: error });
