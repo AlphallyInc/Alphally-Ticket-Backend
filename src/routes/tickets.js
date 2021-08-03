@@ -8,12 +8,15 @@ const {
   userBouncers
 } = Bouncers;
 const {
-  verifyTicketPayload
+  verifyTicketPayload,
+  verifyTicket
 } = TicketMiddleware;
 const {
-  buyMovieTicket
+  buyMovieTicket,
+  makeTicketPayment
 } = TicketController;
 
-router.post('/', userBouncers, verifyTicketPayload, buyMovieTicket);
+router.post('/movie', userBouncers, verifyTicketPayload, buyMovieTicket);
+router.patch('/movie', userBouncers, verifyTicket, makeTicketPayment);
 
 export default router;

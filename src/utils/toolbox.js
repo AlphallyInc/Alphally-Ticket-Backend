@@ -190,7 +190,7 @@ export default class Toolbox {
     const acronym = matches.join(''); // JSON
     const randomNumber = Math.floor(Math.random() * 8999 + 9999);
     const anotherRandomNumber = Math.floor(Math.random() * 8999 + 1000);
-    const reference = `${acronym}_${name}${randomNumber}${anotherRandomNumber}`;
+    const reference = `${acronym}_${randomNumber}${anotherRandomNumber}`;
     return reference;
   }
 
