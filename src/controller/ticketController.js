@@ -14,13 +14,15 @@ const {
 } = Payment;
 const {
   addEntity,
-  updateByKey
+  updateByKey,
+  findByKey
 } = GeneralService;
 const {
   getMedias
 } = UserService;
 const {
-  Ticket
+  Ticket,
+  User
 } = database;
 
 const TicketController = {
@@ -77,6 +79,29 @@ const TicketController = {
         barCode = await qrCode.toDataURL(JSON.stringify(metadata));
       }
       return successResponse(res, { message: 'Ticket Payment Successfully', barCode });
+    } catch (error) {
+      console.error(error);
+      errorResponse(res, { code: 500, message: error });
+    }
+  },
+
+  /**
+   * verify a movie ticket
+   * @async
+   * @param {object} req
+   * @param {object} res
+   * @returns {JSON} a JSON response with user details and Token
+   * @memberof TicketController
+   */
+  async verificationCheck(req, res) {
+    try {
+      const { ticketCode } = req.query;
+      const ticket = await findByKey(Ticket, { ticketCode });
+      if (!ticket) return errorResponse(res, { code: '404', message: 'Error with Ticket, Ticket is Invalid!' });
+      const { userId } = ticket;
+      const user = await findByKey(User, { id: userId });
+      if (!user) return errorResponse(res, { code: '404', message: 'Error with Ticket, Customer not found!' });
+      return successResponse(res, { message: 'Verification Successful, User can watch movie', user });
     } catch (error) {
       console.error(error);
       errorResponse(res, { code: 500, message: error });

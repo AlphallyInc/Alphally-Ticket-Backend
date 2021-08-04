@@ -14,11 +14,13 @@ const {
 const {
   buyMovieTicket,
   makeTicketPayment,
-  verifyPayment
+  verifyPayment,
+  verificationCheck
 } = TicketController;
 
 router.post('/movie', userBouncers, verifyTicketPayload, buyMovieTicket);
 router.patch('/movie', userBouncers, verifyTicket, makeTicketPayment); // ?ticketid=[]
 router.get('/movie/verify', userBouncers, verifyTicket, verifyPayment); // ?ticketid=[]
+router.get('/movie/verification', userBouncers, verificationCheck); // ?ticketCode=[]
 
 export default router;
