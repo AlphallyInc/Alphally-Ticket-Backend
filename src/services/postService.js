@@ -1,5 +1,9 @@
+import { GeneralService } from '.';
 import database from '../models';
 
+const {
+  findByKey
+} = GeneralService;
 const {
   Post,
   User,
@@ -43,7 +47,6 @@ const PostService = {
             model: Comment,
             as: 'comments',
             attributes: ['id', 'comment'],
-            where: {}
           },
           {
             model: PostMedia,
@@ -61,7 +64,6 @@ const PostService = {
         order: [
           ['id', 'DESC']
         ],
-        returning: true
       });
       return entities;
     } catch (error) {
@@ -208,6 +210,29 @@ const PostService = {
         returning: true
       });
       return entities;
+    } catch (error) {
+      throw new Error(error);
+    }
+  },
+
+  /**
+   * recursion function to check for user Like post
+   * @async
+   * @param {array} postData - post datas
+   * @param {array} result - post datas returned with like check
+   * @returns {promise-array} - A promise array of post datas
+   * @memberof PostService
+   */
+  async checkPostLike(postData, result = []) {
+    try {
+      if (postData.length < 1) return result;
+      let liked = false;
+      const post = postData[0];
+      const likePost = await findByKey(Like, { userId: post.userId, postId: post.id });
+      if (likePost) liked = true;
+      result.push({ ...post, liked });
+
+      return PostService.checkPostLike(postData.slice(1), result);
     } catch (error) {
       throw new Error(error);
     }
