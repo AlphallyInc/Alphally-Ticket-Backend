@@ -43,7 +43,7 @@ const GeneralValidation = {
         joi.object({
           address: joi.string().label('Please a valid address'),
           city: joi.string().min(3).max(25).label('Please input a city name'),
-          seats: joi.number().positive().label('Please a valid cinema seats number'),
+          seats: joi.number().positive().required().label('Cinema Address Seat capacity is required'),
           state: joi.valid(states).label('Please state name must be capitalized'),
           country: joi.valid(countries).label('Please country must be capitalized'),
         })
@@ -144,7 +144,7 @@ const GeneralValidation = {
         joi.object({
           address: joi.string().label('Please a valid address'),
           city: joi.string().min(3).max(25).label('Please input a city name'),
-          seats: joi.number().positive().required().label('Please a valid cinema seats number'),
+          seats: joi.number().positive().required().label('Cinema Address Seat capacity is required'),
           state: joi.valid(states).required().label('Please state name must be capitalized'),
           country: joi.valid(countries).required().label('Please country must be capitalized'),
         })
