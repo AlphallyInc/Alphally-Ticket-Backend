@@ -34,6 +34,10 @@ const MovieMiddleware = {
   async verifyMoviePayload(req, res, next) {
     try {
       validateMovie(req.body);
+      if (req.body.title) {
+        const movie = await findByKey(Movie, { title: req.body.title });
+        if (movie) return errorResponse(res, { code: 409, message: 'Movie already exist' });
+      }
       next();
     } catch (error) {
       errorResponse(res, { code: 400, message: error });

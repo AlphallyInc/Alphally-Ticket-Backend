@@ -44,6 +44,7 @@ const MovieController = {
    */
   async addMovie(req, res) {
     try {
+      // return console.log(req.body);
       let mediaPayload;
       let thumbnailMedia;
       let media;
@@ -83,17 +84,21 @@ const MovieController = {
       if (!req.body.numberOfTickets) req.body.isAvialable = false;
       else if (req.body.numberOfTickets <= 0) req.body.isAvialable = false;
       else req.body.isAvialable = true;
+      const mediaTrailer = await findByKey(Media, { url: req.body.trailer });
+      // return console.log(mediaTrailer);
       const movie = await addEntity(Movie, { ...req.body, userId: id });
       const movieCinemaPayload = cinemaIds.map((item) => ({ movieId: movie.id, cinemaId: Number(item) }));
       await MovieCinema.bulkCreate(movieCinemaPayload);
       const movieGenrePayload = genreIds.map((item) => ({ movieId: movie.id, genreId: Number(item) }));
       await MovieGenre.bulkCreate(movieGenrePayload);
       const mediaMoviePayload = media.map((item) => ({ mediaId: Number(item), movieId: movie.id }));
+      if (mediaTrailer) mediaMoviePayload.unshift({ mediaId: mediaTrailer.id, movieId: movie.id });
       const mediaMovie = await MovieMedia.bulkCreate(mediaMoviePayload);
       if (movie && mediaMovie) {
         if (postBody) {
           const post = await addEntity(Post, { ...postBody, userId: id, movieId: movie.id });
           const mediaPostPayload = media.map((item) => ({ mediaId: Number(item), postId: post.id }));
+          if (mediaTrailer) mediaPostPayload.unshift({ mediaId: mediaTrailer.id, postId: post.id });
           await PostMedia.bulkCreate(mediaPostPayload);
           await updateByKey(Movie, { postId: post.id }, { id: movie.id });
         }
@@ -102,6 +107,7 @@ const MovieController = {
         message: 'Post Added Successfully', movie, media, mediaMovie
       });
     } catch (error) {
+      console.error(error);
       errorResponse(res, { code: 500, message: error });
     }
   },

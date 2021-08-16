@@ -22,7 +22,8 @@ const {
   getLikeUserByKey,
   getSeenPostByKey,
   getCommentsByKey,
-  getPostCommentsByKey
+  getPostCommentsByKey,
+  checkPostLike
 } = PostService;
 const {
   Post,
@@ -152,16 +153,19 @@ const PostController = {
         if (!seeenpost) { await addEntity(PostSeen, { postId: req.query.id, userId: req.tokenData.id }); }
       } else if (isPublished) postData = await getPostByKey({ isPublished });
       else postData = await getPostByKey({});
-      return console.log(postData);
+      // return console.log(postData);
       // eslint-disable-next-line max-len
+      // const like = await findByKey(Like, { userId: id, postId });
       postData = await postData.map((item) => ({
         ...item.dataValues,
         likes: item.dataValues.likes.length,
         seen: item.dataValues.seen.length,
         comments: item.dataValues.comments.length
       }));
+      if (postData.length) postData = await checkPostLike(postData);
       return successResponse(res, { message: 'Post Gotten Successfully', postData });
     } catch (error) {
+      console.error(error);
       errorResponse(res, { code: 500, message: error });
     }
   },
