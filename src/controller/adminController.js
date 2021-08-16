@@ -69,7 +69,9 @@ const AdminController = {
   async addCinema(req, res) {
     try {
       const { name, addresses } = req.body;
-      const cinema = await Cinema.create({ name, addresses }, {
+      let capacity = addresses.map((item) => item.seats);
+      capacity = capacity.reduce((accumulator, current) => accumulator + current);
+      const cinema = await Cinema.create({ name, capacity, addresses }, {
         include: [
           {
             model: CinemaAddress,

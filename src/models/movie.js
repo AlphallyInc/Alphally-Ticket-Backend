@@ -53,6 +53,18 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: true
     },
+    postId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+    trendingCount: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    },
+    showTime: {
+      type: DataTypes.TIME,
+      allowNull: true,
+    },
     userId: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -72,14 +84,6 @@ module.exports = (sequelize, DataTypes) => {
       },
       onUpdate: 'CASCADE',
       onDelete: 'CASCADE'
-    },
-    postId: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-    },
-    trendingCount: {
-      type: DataTypes.INTEGER,
-      allowNull: true
     },
   }, {});
   Movie.associate = (models) => {
