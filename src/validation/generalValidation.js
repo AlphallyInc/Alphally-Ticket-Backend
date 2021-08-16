@@ -38,6 +38,7 @@ const GeneralValidation = {
       postId: joi.number().positive().label('Please a valid post id'),
       comment: joi.string().label('Please a valid comment for the post'),
       parentId: joi.number().positive().label('Please a valid comment parent id'),
+      showTime: joi.string().regex(/^([0-9]{2})\:([0-9]{2})$/).label('Please enter a valid show time'),
       addresses: joi.array().items(
         joi.object({
           address: joi.string().label('Please a valid address'),
@@ -175,6 +176,7 @@ const GeneralValidation = {
       cinemaIds: joi.array().items(joi.number().positive().required()).label('Please a valid cinema address'),
       mediaIds: joi.array().items(joi.number().positive().required()).label('Please a valid media Ids'),
       genreIds: joi.array().items(joi.number().positive().required()).label('Please a valid genres'),
+      showTime: joi.string().regex(/^([0-9]{2})\:([0-9]{2})$/).label('Please enter a valid show time'),
       post: joi.object({
         title: joi.string().label('Please a valid post title'),
         body: joi.string().min(3).label('Please input a valid post description'),

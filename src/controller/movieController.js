@@ -44,6 +44,7 @@ const MovieController = {
    */
   async addMovie(req, res) {
     try {
+      // return console.log(req.body);
       let mediaPayload;
       let thumbnailMedia;
       let media;
