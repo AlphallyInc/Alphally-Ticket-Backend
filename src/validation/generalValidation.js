@@ -79,6 +79,26 @@ const GeneralValidation = {
   },
 
   /**
+   * validate category payload
+   * @param {object} payload - user object
+   * @returns {object | boolean} - returns a boolean or an error object
+   * @memberof GeneralValidation
+   */
+  validateCategory(payload) {
+    const schema = {
+      category: joi.array().items(
+        joi.object({
+          name: joi.string().required().label('Please name is required and must be valid (string)'),
+          description: joi.string().min(3).max(200).label('Please input a valid description'),
+        })
+      ).label('Please category payload must be an array of category objects'),
+    };
+    const { error } = joi.validate({ ...payload }, schema);
+    if (error) throw error.details[0].context.label;
+    return true;
+  },
+
+  /**
    * validate required id
    * @param {object} payload - user object
    * @returns {object | boolean} - returns a boolean or an error object

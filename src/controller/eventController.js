@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import { GeneralService, MovieService } from '../services';
+import { GeneralService, EventService } from '../services';
 import { Toolbox, Helpers } from '../utils';
 import database from '../models';
 
@@ -20,8 +20,8 @@ const {
   uploadAllVideos
 } = Helpers;
 const {
-  getMovieByKey
-} = MovieService;
+  recursiveCategories
+} = EventService;
 const {
   PostMedia,
   MovieMedia,
@@ -30,17 +30,18 @@ const {
   Media,
   MovieCinema,
   MovieGenre,
-  Genre
+  Category,
+  EventCategory
 } = database;
 
-const MovieController = {
+const EventController = {
   /**
    * add a movie and a post
    * @async
    * @param {object} req
    * @param {object} res
    * @returns {JSON} a JSON response with user details and Token
-   * @memberof MovieController
+   * @memberof EventController
    */
   async addMovie(req, res) {
     try {
@@ -113,59 +114,59 @@ const MovieController = {
   },
 
   /**
-   * add genres
+   * add categories
    * @async
    * @param {object} req
    * @param {object} res
    * @returns {JSON} a JSON response with user details and Token
-   * @memberof MovieController
+   * @memberof EventController
    */
-  async addGenre(req, res) {
+  async addCategory(req, res) {
     try {
-      const genres = await Genre.bulkCreate(req.body.genres);
-      return successResponse(res, { message: 'Genres Added Successfully', genres });
+      const payload = req.body.map((item) => ({ ...item, name: item.name.toLowerCase() }));
+      await recursiveCategories(payload);
+      return successResponse(res, { message: 'Categories Added Successfully' });
     } catch (error) {
       errorResponse(res, { code: 500, message: error });
     }
   },
 
   /**
-   * update genres
+   * update update category
    * @async
    * @param {object} req
    * @param {object} res
    * @returns {JSON} a JSON response with user details and Token
-   * @memberof MovieController
+   * @memberof EventController
    */
-  async updateGenre(req, res) {
+  async updateCategory(req, res) {
     try {
       const { id } = req.query;
-      let genre = await findByKey(Genre, { id });
-      if (!genre) return errorResponse(res, { code: 404, message: 'Genre does not exist' });
-      genre = await updateByKey(Genre, { name: req.body.name }, { id });
-      return successResponse(res, { message: 'Genres Updated Successfully', genre });
+      let category = await findByKey(Category, { id });
+      if (!category) return errorResponse(res, { code: 404, message: 'Category does not exist' });
+      category = await updateByKey(Category, { ...req.body }, { id });
+      return successResponse(res, { message: 'Category Updated Successfully', category });
     } catch (error) {
       errorResponse(res, { code: 500, message: error });
     }
   },
 
   /**
-   * delete genres
+   * delete category
    * @async
    * @param {object} req
    * @param {object} res
    * @returns {JSON} a JSON response with user details and Token
-   * @memberof MovieController
+   * @memberof EventController
    */
-  async deleteGenre(req, res) {
+  async deleteCateory(req, res) {
     try {
       const { id } = req.query;
-      const genre = await findByKey(Genre, { id });
-      if (!genre) return errorResponse(res, { code: 404, message: 'Genre does not exist' });
-      await deleteByKey(Genre, { id });
-      return successResponse(res, { message: 'Genres Deleted Successfully' });
+      const category = await findByKey(Category, { id });
+      if (!category) return errorResponse(res, { code: 404, message: 'Category does not exist' });
+      await deleteByKey(Category, { id });
+      return successResponse(res, { message: 'Category Deleted Successfully' });
     } catch (error) {
-      console.error(error);
       errorResponse(res, { code: 500, message: error });
     }
   },
@@ -176,12 +177,12 @@ const MovieController = {
    * @param {object} req
    * @param {object} res
    * @returns {JSON} a JSON response with user details and Token
-   * @memberof MovieController
+   * @memberof EventController
    */
-  async getGenres(req, res) {
+  async getCategory(req, res) {
     try {
-      const genres = await allEntities(Genre);
-      return successResponse(res, { message: 'Genres Gotten Successfully', genres });
+      const category = await allEntities(Category);
+      return successResponse(res, { message: 'Category Gotten Successfully', category });
     } catch (error) {
       errorResponse(res, { code: 500, message: error });
     }
@@ -193,7 +194,7 @@ const MovieController = {
    * @param {object} req
    * @param {object} res
    * @returns {JSON} a JSON response with user details and Token
-   * @memberof MovieController
+   * @memberof EventController
    */
   async deleteMovie(req, res) {
     try {
@@ -213,7 +214,7 @@ const MovieController = {
    * @param {object} req
    * @param {object} res
    * @returns {JSON} a JSON response with user details and Token
-   * @memberof MovieController
+   * @memberof EventController
    */
   async updateMovie(req, res) {
     try {
@@ -231,7 +232,7 @@ const MovieController = {
    * @param {object} req
    * @param {object} res
    * @returns {JSON} a JSON response with user details and Token
-   * @memberof MovieController
+   * @memberof EventController
    */
   async getMovie(req, res) {
     try {
@@ -247,4 +248,4 @@ const MovieController = {
   },
 };
 
-export default MovieController;
+export default EventController;
