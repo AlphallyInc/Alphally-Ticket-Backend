@@ -10,10 +10,11 @@ const {
 } = Bouncers;
 const {
   validateCategoriesPayload,
+  verifyEventPayload,
   verifyMovie
 } = EventMiddleware;
 const {
-  addMovie,
+  addEvent,
   deleteMovie,
   updateMovie,
   getMovie,
@@ -23,7 +24,7 @@ const {
   getCategory
 } = EventController;
 
-// router.post('/', userBouncers, verifyMoviePayload, addMovie);
+router.post('/', userBouncers, verifyEventPayload, addEvent);
 router.patch('/', userBouncers, verifyMovie, updateMovie);
 router.delete('/', userBouncers, verifyMovie, deleteMovie);
 router.get('/', userBouncers, verifyMovie, getMovie);

@@ -211,6 +211,42 @@ const GeneralValidation = {
   },
 
   /**
+   * validate even payload
+   * @param {object} payload - user object
+   * @returns {object | boolean} - returns a boolean or an error object
+   * @memberof GeneralValidation
+   */
+  validateEvent(payload) {
+    const schema = {
+      name: joi.string().required().label('Please a valid post title'),
+      description: joi.string().required().label('Please a valid movie story line'),
+      address: joi.string().required().label('Please a valid movie story line'),
+      startDate: joi.date().required().label('Please a valid date when the movie will be released'),
+      endDate: joi.date().required().label('Please a valid date when the movie will be released'),
+      startTime: joi.string().regex(/^([0-9]{2})\:([0-9]{2})$/).label('Please enter a valid show time'),
+      endTime: joi.string().regex(/^([0-9]{2})\:([0-9]{2})$/).label('Please enter a valid show time'),
+      discount: joi.number().precision(2).label('Please a valid discount, it\'s percentage should be presented in at most 2 decimal pllaces'),
+      ticketPrice: joi.number().positive().required().label('Please a valid movie ticket price'),
+      shareLink: joi.string().uri().label('Please a valid and shareable link  '),
+      trailer: joi.string().uri().label('Please a valid and trailer link  '),
+      duration: joi.string().required().label("Please duration should be for example '90 minutes' to be valid"),
+      numberOfTickets: joi.number().positive().required().label('Please a valid number of tickets'),
+      rating: joi.number().positive().required().label('Please a valid number of tickets'),
+      privacyId: joi.number().integer().positive().label('Please a valid privacy value'),
+      categoryIds: joi.array().items(joi.number().positive().required()).label('Please a valid cinema address'),
+      mediaIds: joi.array().items(joi.number().positive().required()).label('Please a valid media Ids'),
+      post: joi.object({
+        title: joi.string().label('Please a valid post title'),
+        body: joi.string().min(3).label('Please input a valid post description'),
+        privacyId: joi.number().integer().positive().label('Please a valid privacy value')
+      }).label('Please add a post details for this movie')
+    };
+    const { error } = joi.validate({ ...payload }, schema);
+    if (error) throw error.details[0].context.label;
+    return true;
+  },
+
+  /**
    * validate comment payload
    * @param {object} payload - user object
    * @returns {object | boolean} - returns a boolean or an error object

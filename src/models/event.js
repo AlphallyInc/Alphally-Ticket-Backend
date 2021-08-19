@@ -60,6 +60,24 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: true
     },
+    postId: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    },
+    trendingCount: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    },
+    isAvialable: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
+      defaultValues: true
+    },
+    trailer: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
+      defaultValues: true
+    },
     userId: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -79,10 +97,6 @@ module.exports = (sequelize, DataTypes) => {
       },
       onUpdate: 'CASCADE',
       onDelete: 'CASCADE'
-    },
-    postId: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
     }
   }, {});
   Event.associate = () => {

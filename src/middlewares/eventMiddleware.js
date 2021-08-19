@@ -7,7 +7,7 @@ const {
   errorResponse,
 } = Toolbox;
 const {
-  validateMovie,
+  validateEvent,
   validateId,
   validateParameters,
   validateCategory
@@ -18,7 +18,7 @@ const {
 const {
   Post,
   Comment,
-  Movie
+  Event
 } = database;
 
 const EventMiddleware = {
@@ -41,7 +41,7 @@ const EventMiddleware = {
   },
 
   /**
-   * middleware validating movie payload
+   * middleware validating event payload
    * @async
    * @param {object} req - the api request
    * @param {object} res - api response returned by method
@@ -49,12 +49,12 @@ const EventMiddleware = {
    * @returns {object} - returns error or response object
    * @memberof EventMiddleware
    */
-  async verifyMoviePayload(req, res, next) {
+  async verifyEventPayload(req, res, next) {
     try {
-      validateMovie(req.body);
-      if (req.body.title) {
-        const movie = await findByKey(Movie, { title: req.body.title });
-        if (movie) return errorResponse(res, { code: 409, message: 'Movie already exist' });
+      validateEvent(req.body);
+      if (req.body.name) {
+        const event = await findByKey(Event, { name: req.body.name });
+        if (event) return errorResponse(res, { code: 409, message: 'Event already exist' });
       }
       next();
     } catch (error) {

@@ -13,7 +13,8 @@ const {
   updateByKey,
   findByKey,
   deleteByKey,
-  allEntities
+  allEntities,
+  findMultipleByKey
 } = GeneralService;
 const {
   uploadAllImages,
@@ -199,6 +200,12 @@ const MovieController = {
     try {
       const { movie } = req;
       const { postId, id } = movie;
+      let medias = await findMultipleByKey(MovieMedia, { movieId: movie.id });
+      if (medias.length > 0) {
+        medias = medias.map(({ mediaId }) => mediaId);
+        await deleteByKey(Media, { id: medias });
+        await deleteByKey(MovieMedia, { mediaId: medias });
+      }
       if (postId !== null) await deleteByKey(Post, { id: postId });
       await deleteByKey(Movie, { id });
       return successResponse(res, { message: 'Movie Added Successfully' });

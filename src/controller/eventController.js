@@ -13,7 +13,8 @@ const {
   updateByKey,
   findByKey,
   deleteByKey,
-  allEntities
+  allEntities,
+  findMultipleByKey
 } = GeneralService;
 const {
   uploadAllImages,
@@ -24,88 +25,59 @@ const {
 } = EventService;
 const {
   PostMedia,
-  MovieMedia,
-  Movie,
+  EventMedia,
+  Event,
   Post,
   Media,
-  MovieCinema,
+  EventCategory,
   MovieGenre,
   Category,
-  EventCategory
 } = database;
 
 const EventController = {
   /**
-   * add a movie and a post
+   * add a event and a post
    * @async
    * @param {object} req
    * @param {object} res
    * @returns {JSON} a JSON response with user details and Token
    * @memberof EventController
    */
-  async addMovie(req, res) {
+  async addEvent(req, res) {
     try {
-      // return console.log(req.body);
-      let mediaPayload;
-      let thumbnailMedia;
+      let body;
       let media;
       const { id } = req.tokenData;
       const postBody = req.body.post;
-      const { cinemaIds, genreIds } = req.body;
+      const { categoryIds, mediaIds } = req.body;
       delete req.body.post;
-      delete req.body.cinemaIds;
-      delete req.body.genreIds;
-      if (req.files && req.files.length) {
-        let imageMediaPayload;
-        let videoMediaPayload;
-        const fullMediaPayload = req.files.map((item) => ({
-          type: item.mimetype.split('/')[0],
-          fileExtension: item.mimetype.split('/')[1],
-          userId: id,
-          fileName: item.originalname
-        }));
-        const imagePayload = req.files.filter((item) => item.mimetype.split('/')[0].toLowerCase() === 'image');
-        const videoPayload = req.files.filter((item) => item.mimetype.split('/')[0].toLowerCase() === 'video');
-        if (imagePayload.length > 0) {
-          const imageUrls = await uploadAllImages(imagePayload);
-          imageMediaPayload = mergeImageVideoUrls(fullMediaPayload, imageUrls);
-        }
-        if (videoPayload.length > 0) {
-          const videoUrls = await uploadAllVideos(videoPayload);
-          videoMediaPayload = mergeImageVideoUrls(fullMediaPayload, videoUrls);
-        }
-        mediaPayload = imageMediaPayload.concat(videoMediaPayload);
-        media = await Media.bulkCreate(mediaPayload);
-      } else if (req.body.mediaIds) {
-        if (req.body.thumbnailId) {
-          thumbnailMedia = req.body.mediaIds.unshift(req.body.thumbnailId);
-        }
-        media = req.body.mediaIds;
-      }
-      if (!req.body.numberOfTickets) req.body.isAvialable = false;
-      else if (req.body.numberOfTickets <= 0) req.body.isAvialable = false;
-      else req.body.isAvialable = true;
+      delete req.body.categoryIds;
+      delete req.body.mediaIds;
+
+      if (!req.body.numberOfTickets) req.body = { ...req.body, isAvialable: false };
+      else if (req.body.numberOfTickets <= 0) req.body = { ...req.body, isAvialable: false };
+      else req.body = { ...req.body, isAvialable: true };
       const mediaTrailer = await findByKey(Media, { url: req.body.trailer });
-      // return console.log(mediaTrailer);
-      const movie = await addEntity(Movie, { ...req.body, userId: id });
-      const movieCinemaPayload = cinemaIds.map((item) => ({ movieId: movie.id, cinemaId: Number(item) }));
-      await MovieCinema.bulkCreate(movieCinemaPayload);
-      const movieGenrePayload = genreIds.map((item) => ({ movieId: movie.id, genreId: Number(item) }));
-      await MovieGenre.bulkCreate(movieGenrePayload);
-      const mediaMoviePayload = media.map((item) => ({ mediaId: Number(item), movieId: movie.id }));
-      if (mediaTrailer) mediaMoviePayload.unshift({ mediaId: mediaTrailer.id, movieId: movie.id });
-      const mediaMovie = await MovieMedia.bulkCreate(mediaMoviePayload);
-      if (movie && mediaMovie) {
+      const thumbnailUrl = await findByKey(Media, { id: req.body.thumbnailId });
+      if (thumbnailUrl) body = { ...req.body, thumbnail: thumbnailUrl.url, userId: id };
+      const event = await addEntity(Event, body);
+      const movieCategoryPayload = categoryIds.map((item) => ({ eventId: event.id, categoryId: Number(item) }));
+      await EventCategory.bulkCreate(movieCategoryPayload);
+      const mediaMoviePayload = mediaIds.map((item) => ({ mediaId: Number(item), eventId: event.id }));
+      if (mediaTrailer) mediaMoviePayload.unshift({ mediaId: mediaTrailer.id, eventId: event.id });
+      if (thumbnailUrl) mediaMoviePayload.unshift({ mediaId: req.body.thumbnailId, eventId: event.id });
+      const eventMedia = await EventMedia.bulkCreate(mediaMoviePayload);
+      if (event && eventMedia) {
         if (postBody) {
-          const post = await addEntity(Post, { ...postBody, userId: id, movieId: movie.id });
+          const post = await addEntity(Post, { ...postBody, userId: id, eventId: event.id });
           const mediaPostPayload = media.map((item) => ({ mediaId: Number(item), postId: post.id }));
           if (mediaTrailer) mediaPostPayload.unshift({ mediaId: mediaTrailer.id, postId: post.id });
           await PostMedia.bulkCreate(mediaPostPayload);
-          await updateByKey(Movie, { postId: post.id }, { id: movie.id });
+          await updateByKey(Event, { postId: post.id }, { id: event.id });
         }
       }
       return successResponse(res, {
-        message: 'Post Added Successfully', movie, media, mediaMovie
+        message: 'Post Added Successfully', event, eventMedia
       });
     } catch (error) {
       console.error(error);
@@ -191,45 +163,51 @@ const EventController = {
   },
 
   /**
-   * delete a movie and a post
+   * delete a event and a post
    * @async
    * @param {object} req
    * @param {object} res
    * @returns {JSON} a JSON response with user details and Token
    * @memberof EventController
    */
-  async deleteMovie(req, res) {
+  async deleteEvent(req, res) {
     try {
-      const { movie } = req;
-      const { postId, id } = movie;
+      const { event } = req;
+      const { postId, id } = event;
+      let medias = await findMultipleByKey(EventMedia, { eventId: event.id });
+      if (medias.length > 0) {
+        medias = medias.map(({ mediaId }) => mediaId);
+        await deleteByKey(Media, { id: medias });
+        await deleteByKey(EventMedia, { mediaId: medias });
+      }
       if (postId !== null) await deleteByKey(Post, { id: postId });
-      await deleteByKey(Movie, { id });
-      return successResponse(res, { message: 'Movie Added Successfully' });
+      await deleteByKey(Event, { id });
+      return successResponse(res, { message: 'Event Added Successfully' });
     } catch (error) {
       errorResponse(res, { code: 500, message: error });
     }
   },
 
   /**
-   * update a movie and a post
+   * update a event and a post
    * @async
    * @param {object} req
    * @param {object} res
    * @returns {JSON} a JSON response with user details and Token
    * @memberof EventController
    */
-  async updateMovie(req, res) {
+  async updateEvent(req, res) {
     try {
-      const { movie } = req;
-      const moviee = await updateByKey(Movie, { ...req.body }, { id: movie.id });
-      return successResponse(res, { message: 'Movie updated Successfully', moviee });
+      // if (req.body.categoryIds) ;
+      const event = await updateByKey(Event, { ...req.body }, { id: req.event.id });
+      return successResponse(res, { message: 'Event updated Successfully', event });
     } catch (error) {
       errorResponse(res, { code: 500, message: error });
     }
   },
 
   /**
-   * get a movie and a post
+   * get a event and a post
    * @async
    * @param {object} req
    * @param {object} res
