@@ -18,8 +18,8 @@ const EventService = {
       if (categories.length < 1) return;
 
       const categoryData = categories[0];
-      const data = await Category.findOrCreate({ where: categoryData });
-      return console.log(data);
+      await Category.findOrCreate({ where: categoryData });
+      // return console.log(data);
       return EventService.recursiveCategories(categories.slice(1));
     } catch (error) {
       throw new Error(error);

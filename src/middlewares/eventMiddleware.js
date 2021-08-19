@@ -33,7 +33,7 @@ const EventMiddleware = {
    */
   async validateCategoriesPayload(req, res, next) {
     try {
-      validateCategory({ category: req.body });
+      validateCategory(req.body);
       next();
     } catch (error) {
       errorResponse(res, { code: 400, message: error });

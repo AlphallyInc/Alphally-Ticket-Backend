@@ -30,6 +30,6 @@ router.get('/', userBouncers, verifyMovie, getMovie);
 router.post('/category', adminBouncers, validateCategoriesPayload, addCategory);
 router.patch('/category', adminBouncers, updateCategory);
 router.delete('/category', adminBouncers, deleteCateory);
-router.get('/genre', userBouncers, getCategory);
+router.get('/categories', userBouncers, getCategory);
 
 export default router;

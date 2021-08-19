@@ -123,10 +123,12 @@ const EventController = {
    */
   async addCategory(req, res) {
     try {
-      const payload = req.body.map((item) => ({ ...item, name: item.name.toLowerCase() }));
+      const payload = req.body.category.map((item) => ({ decription: item.description, name: item.name.toLowerCase() }));
+      // return console.log(payload);
       await recursiveCategories(payload);
       return successResponse(res, { message: 'Categories Added Successfully' });
     } catch (error) {
+      console.error(error);
       errorResponse(res, { code: 500, message: error });
     }
   },
