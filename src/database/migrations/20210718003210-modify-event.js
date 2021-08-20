@@ -37,9 +37,8 @@ module.exports = {
       'Events',
       'trailer',
       {
-        type: Sequelize.BOOLEAN,
+        type: Sequelize.STRING,
         allowNull: true,
-        defaultValues: true
       }
     ),
   ]),

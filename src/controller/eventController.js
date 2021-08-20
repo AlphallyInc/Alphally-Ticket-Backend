@@ -21,7 +21,8 @@ const {
   uploadAllVideos
 } = Helpers;
 const {
-  recursiveCategories
+  recursiveCategories,
+  getEventByKey
 } = EventService;
 const {
   PostMedia,
@@ -47,6 +48,8 @@ const EventController = {
     try {
       let body;
       let media;
+      let thumbnailUrl;
+      let mediaTrailer;
       const { id } = req.tokenData;
       const postBody = req.body.post;
       const { categoryIds, mediaIds } = req.body;
@@ -57,30 +60,30 @@ const EventController = {
       if (!req.body.numberOfTickets) req.body = { ...req.body, isAvialable: false };
       else if (req.body.numberOfTickets <= 0) req.body = { ...req.body, isAvialable: false };
       else req.body = { ...req.body, isAvialable: true };
-      const mediaTrailer = await findByKey(Media, { url: req.body.trailer });
-      const thumbnailUrl = await findByKey(Media, { id: req.body.thumbnailId });
-      if (thumbnailUrl) body = { ...req.body, thumbnail: thumbnailUrl.url, userId: id };
+      if (req.body.trailer) mediaTrailer = await findByKey(Media, { url: req.body.trailer });
+      if (req.body.thumbnailId) thumbnailUrl = await findByKey(Media, { id: req.body.thumbnailId });
+      if (thumbnailUrl) body = { ...req.body, trailer: thumbnailUrl.url, userId: id };
       const event = await addEntity(Event, body);
       const movieCategoryPayload = categoryIds.map((item) => ({ eventId: event.id, categoryId: Number(item) }));
       await EventCategory.bulkCreate(movieCategoryPayload);
       const mediaMoviePayload = mediaIds.map((item) => ({ mediaId: Number(item), eventId: event.id }));
-      if (mediaTrailer) mediaMoviePayload.unshift({ mediaId: mediaTrailer.id, eventId: event.id });
       if (thumbnailUrl) mediaMoviePayload.unshift({ mediaId: req.body.thumbnailId, eventId: event.id });
+      if (mediaTrailer) mediaMoviePayload.unshift({ mediaId: mediaTrailer.id, eventId: event.id });
       const eventMedia = await EventMedia.bulkCreate(mediaMoviePayload);
       if (event && eventMedia) {
         if (postBody) {
           const post = await addEntity(Post, { ...postBody, userId: id, eventId: event.id });
-          const mediaPostPayload = media.map((item) => ({ mediaId: Number(item), postId: post.id }));
+          const mediaPostPayload = mediaIds.map((item) => ({ mediaId: Number(item), postId: post.id }));
+          if (thumbnailUrl) mediaPostPayload.unshift({ mediaId: req.body.thumbnailId, postId: post.id });
           if (mediaTrailer) mediaPostPayload.unshift({ mediaId: mediaTrailer.id, postId: post.id });
           await PostMedia.bulkCreate(mediaPostPayload);
           await updateByKey(Event, { postId: post.id }, { id: event.id });
         }
       }
       return successResponse(res, {
-        message: 'Post Added Successfully', event, eventMedia
+        message: 'Event Added Successfully', event, eventMedia
       });
     } catch (error) {
-      console.error(error);
       errorResponse(res, { code: 500, message: error });
     }
   },
@@ -214,15 +217,16 @@ const EventController = {
    * @returns {JSON} a JSON response with user details and Token
    * @memberof EventController
    */
-  async getMovie(req, res) {
+  async getEvent(req, res) {
     try {
-      let movieData;
+      let eventData;
       const { id, privacyId } = req.query;
-      if (id) movieData = await getMovieByKey({ id });
-      else if (privacyId) movieData = await getMovieByKey({ privacyId });
-      else movieData = await getMovieByKey({});
-      return successResponse(res, { message: 'Post Gotten Successfully', movieData });
+      if (id) eventData = await getEventByKey({ id });
+      else if (privacyId) eventData = await getEventByKey({ privacyId });
+      else eventData = await getEventByKey({});
+      return successResponse(res, { message: 'Event Gotten Successfully', eventData });
     } catch (error) {
+      console.error(error);
       errorResponse(res, { code: 500, message: error });
     }
   },

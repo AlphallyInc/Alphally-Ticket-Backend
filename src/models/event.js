@@ -74,9 +74,8 @@ module.exports = (sequelize, DataTypes) => {
       defaultValues: true
     },
     trailer: {
-      type: DataTypes.BOOLEAN,
-      allowNull: true,
-      defaultValues: true
+      type: DataTypes.STRING,
+      allowNull: true
     },
     userId: {
       type: DataTypes.INTEGER,
@@ -99,7 +98,12 @@ module.exports = (sequelize, DataTypes) => {
       onDelete: 'CASCADE'
     }
   }, {});
-  Event.associate = () => {
+  Event.associate = (models) => {
+    Event.belongsToMany(models.Category, {
+      through: 'EventCategory',
+      as: 'events',
+      foreignKey: 'eventId'
+    });
   };
   return Event;
 };

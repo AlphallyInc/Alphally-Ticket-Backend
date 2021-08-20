@@ -15,9 +15,9 @@ const {
 } = EventMiddleware;
 const {
   addEvent,
-  deleteMovie,
-  updateMovie,
-  getMovie,
+  deleteEvent,
+  updateEvent,
+  getEvent,
   addCategory,
   updateCategory,
   deleteCateory,
@@ -25,9 +25,9 @@ const {
 } = EventController;
 
 router.post('/', userBouncers, verifyEventPayload, addEvent);
-router.patch('/', userBouncers, verifyMovie, updateMovie);
-router.delete('/', userBouncers, verifyMovie, deleteMovie);
-router.get('/', userBouncers, verifyMovie, getMovie);
+router.patch('/', userBouncers, verifyMovie, updateEvent);
+router.delete('/', userBouncers, verifyMovie, deleteEvent);
+router.get('/', userBouncers, verifyMovie, getEvent);
 router.post('/category', adminBouncers, validateCategoriesPayload, addCategory);
 router.patch('/category', adminBouncers, updateCategory);
 router.delete('/category', adminBouncers, deleteCateory);

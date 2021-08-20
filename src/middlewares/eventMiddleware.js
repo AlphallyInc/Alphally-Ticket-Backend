@@ -51,6 +51,7 @@ const EventMiddleware = {
    */
   async verifyEventPayload(req, res, next) {
     try {
+      // return console.log(req.body);
       validateEvent(req.body);
       if (req.body.name) {
         const event = await findByKey(Event, { name: req.body.name });

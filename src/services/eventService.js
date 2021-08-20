@@ -3,7 +3,10 @@ import database from '../models';
 const {
   Event,
   EventCategory,
-  Category
+  Category,
+  User,
+  EventMedia,
+  Media
 } = database;
 
 const EventService = {
@@ -27,15 +30,15 @@ const EventService = {
   },
 
   /**
-   * Get user posts
+   * Get events
    * @async
    * @param {object} key - inputs like names or tags
    * @returns {promise-Object} - A promise object with entity details
    * @memberof EventService
    */
-  async getMovieByKey(key) {
+  async getEventByKey(key) {
     try {
-      const entities = await Movie.findAll({
+      const entities = await Event.findAll({
         include: [
           {
             model: User,
@@ -43,29 +46,21 @@ const EventService = {
             attributes: ['id', 'name', 'username', 'imageUrl'],
           },
           {
-            model: Cinema,
-            as: 'cinemas',
-            attributes: ['id'],
-            through: {
-              model: MovieCinema
-            }
-          },
-          {
             model: Media,
             as: 'medias',
             attributes: ['id'],
             through: {
-              model: MovieMedia
+              model: EventMedia
             }
           },
           {
-            model: Genre,
-            as: 'genres',
+            model: Category,
+            as: 'categories',
             attributes: ['id'],
             through: {
-              model: MovieGenre
+              model: EventCategory
             }
-          }
+          },
         ],
         where: key,
         order: [
