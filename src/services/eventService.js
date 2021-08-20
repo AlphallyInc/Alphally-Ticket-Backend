@@ -48,17 +48,19 @@ const EventService = {
           {
             model: Media,
             as: 'medias',
-            attributes: ['id'],
+            attributes: ['id', 'url', 'type'],
             through: {
-              model: EventMedia
+              model: EventMedia,
+              attributes: ['id']
             }
           },
           {
             model: Category,
             as: 'categories',
-            attributes: ['id'],
+            attributes: ['id', 'name', 'decription'],
             through: {
-              model: EventCategory
+              model: EventCategory,
+              attributes: ['id']
             }
           },
         ],

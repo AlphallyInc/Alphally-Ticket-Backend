@@ -64,7 +64,7 @@ const EventMiddleware = {
   },
 
   /**
-   * middleware validating movie payload
+   * middleware validating event payload
    * @async
    * @param {object} req - the api request
    * @param {object} res - api response returned by method
@@ -72,14 +72,14 @@ const EventMiddleware = {
    * @returns {object} - returns error or response object
    * @memberof EventMiddleware
    */
-  async verifyMovie(req, res, next) {
+  async verifyEvent(req, res, next) {
     try {
-      if (req.query.id || req.query.movieId) {
-        const id = req.query.id || req.query.movieId;
+      if (req.query.id || req.query.eventId) {
+        const id = req.query.id || req.query.eventId;
         validateId({ id });
-        const movie = await findByKey(Movie, { id });
-        if (!movie) return errorResponse(res, { code: 404, message: 'Movie is Not Found' });
-        req.movie = movie;
+        const event = await findByKey(Event, { id });
+        if (!event) return errorResponse(res, { code: 404, message: 'Event is Not Found' });
+        req.event = event;
       }
       if (req.body) validateParameters(req.body);
       next();

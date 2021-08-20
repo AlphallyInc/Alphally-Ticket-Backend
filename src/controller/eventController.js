@@ -185,7 +185,7 @@ const EventController = {
       }
       if (postId !== null) await deleteByKey(Post, { id: postId });
       await deleteByKey(Event, { id });
-      return successResponse(res, { message: 'Event Added Successfully' });
+      return successResponse(res, { message: 'Event Deleted Successfully' });
     } catch (error) {
       errorResponse(res, { code: 500, message: error });
     }
@@ -201,7 +201,6 @@ const EventController = {
    */
   async updateEvent(req, res) {
     try {
-      // if (req.body.categoryIds) ;
       const event = await updateByKey(Event, { ...req.body }, { id: req.event.id });
       return successResponse(res, { message: 'Event updated Successfully', event });
     } catch (error) {

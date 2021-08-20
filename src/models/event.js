@@ -101,7 +101,20 @@ module.exports = (sequelize, DataTypes) => {
   Event.associate = (models) => {
     Event.belongsToMany(models.Category, {
       through: 'EventCategory',
-      as: 'events',
+      as: 'categories',
+      foreignKey: 'eventId'
+    });
+    Event.belongsTo(models.User, {
+      as: 'publisher',
+      foreignKey: 'userId'
+    });
+    Event.belongsToMany(models.Media, {
+      through: 'EventMedia',
+      as: 'medias',
+      foreignKey: 'eventId'
+    });
+    Event.hasMany(models.EventMedia, {
+      as: 'media',
       foreignKey: 'eventId'
     });
   };

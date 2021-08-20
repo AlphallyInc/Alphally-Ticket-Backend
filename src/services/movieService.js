@@ -31,25 +31,28 @@ const MovieService = {
           {
             model: Cinema,
             as: 'cinemas',
-            attributes: ['id'],
+            attributes: ['id', 'name', 'address', 'seats', 'state'],
             through: {
-              model: MovieCinema
+              model: MovieCinema,
+              attributes: ['id'],
             }
           },
           {
             model: Media,
             as: 'medias',
-            attributes: ['id'],
+            attributes: ['id', 'url', 'type'],
             through: {
-              model: MovieMedia
+              model: MovieMedia,
+              attributes: ['id'],
             }
           },
           {
             model: Genre,
             as: 'genres',
-            attributes: ['id'],
+            attributes: ['id', 'name'],
             through: {
-              model: MovieGenre
+              model: MovieGenre,
+              attributes: ['id'],
             }
           }
         ],

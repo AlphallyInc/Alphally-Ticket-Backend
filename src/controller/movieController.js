@@ -208,7 +208,7 @@ const MovieController = {
       }
       if (postId !== null) await deleteByKey(Post, { id: postId });
       await deleteByKey(Movie, { id });
-      return successResponse(res, { message: 'Movie Added Successfully' });
+      return successResponse(res, { message: 'Movie Updated Successfully' });
     } catch (error) {
       errorResponse(res, { code: 500, message: error });
     }

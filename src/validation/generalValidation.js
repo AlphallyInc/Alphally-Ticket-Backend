@@ -56,7 +56,11 @@ const GeneralValidation = {
         title: joi.string().label('Please input a valid post title'),
         body: joi.string().min(3).label('Please input a valid post description'),
         privacyId: joi.number().integer().positive().label('Please input a valid privacy value')
-      }).label('Please add a post details for this movie')
+      }).label('Please add a post details for this movie'),
+      startDate: joi.date().label('Please input a valid date when the movie will be released'),
+      endDate: joi.date().label('Please input a valid date when the movie will be released'),
+      startTime: joi.string().regex(/^([0-9]{2})\:([0-9]{2})$/).label('Please enter a valid show time'),
+      endTime: joi.string().regex(/^([0-9]{2})\:([0-9]{2})$/).label('Please enter a valid show time'),
     };
     const { error } = joi.validate({ ...payload }, schema);
     if (error) throw error.details[0].context.label;
