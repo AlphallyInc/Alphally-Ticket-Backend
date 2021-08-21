@@ -3,6 +3,7 @@ import UserMiddleware from './userMiddlewares';
 import AdminMiddleware from './adminMiddleware';
 import PostMiddleware from './postMiddlewares';
 import MovieMiddleware from './movieMiddleware';
+import EventMiddleware from './eventMiddleware';
 import TicketMiddleware from './ticketMiddleware';
 import Bouncers from './bouncers';
 
@@ -13,5 +14,6 @@ export {
   AdminMiddleware,
   PostMiddleware,
   MovieMiddleware,
-  TicketMiddleware
+  TicketMiddleware,
+  EventMiddleware
 };

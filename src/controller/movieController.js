@@ -13,7 +13,8 @@ const {
   updateByKey,
   findByKey,
   deleteByKey,
-  allEntities
+  allEntities,
+  findMultipleByKey
 } = GeneralService;
 const {
   uploadAllImages,
@@ -143,7 +144,7 @@ const MovieController = {
       let genre = await findByKey(Genre, { id });
       if (!genre) return errorResponse(res, { code: 404, message: 'Genre does not exist' });
       genre = await updateByKey(Genre, { name: req.body.name }, { id });
-      return successResponse(res, { message: 'Genres Added Successfully', genre });
+      return successResponse(res, { message: 'Genres Updated Successfully', genre });
     } catch (error) {
       errorResponse(res, { code: 500, message: error });
     }
@@ -199,9 +200,15 @@ const MovieController = {
     try {
       const { movie } = req;
       const { postId, id } = movie;
+      let medias = await findMultipleByKey(MovieMedia, { movieId: movie.id });
+      if (medias.length > 0) {
+        medias = medias.map(({ mediaId }) => mediaId);
+        await deleteByKey(Media, { id: medias });
+        await deleteByKey(MovieMedia, { mediaId: medias });
+      }
       if (postId !== null) await deleteByKey(Post, { id: postId });
       await deleteByKey(Movie, { id });
-      return successResponse(res, { message: 'Movie Added Successfully' });
+      return successResponse(res, { message: 'Movie Updated Successfully' });
     } catch (error) {
       errorResponse(res, { code: 500, message: error });
     }

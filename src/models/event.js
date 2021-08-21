@@ -60,6 +60,23 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: true
     },
+    postId: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    },
+    trendingCount: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    },
+    isAvialable: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
+      defaultValues: true
+    },
+    trailer: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
     userId: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -79,13 +96,27 @@ module.exports = (sequelize, DataTypes) => {
       },
       onUpdate: 'CASCADE',
       onDelete: 'CASCADE'
-    },
-    postId: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
     }
   }, {});
-  Event.associate = () => {
+  Event.associate = (models) => {
+    Event.belongsToMany(models.Category, {
+      through: 'EventCategory',
+      as: 'categories',
+      foreignKey: 'eventId'
+    });
+    Event.belongsTo(models.User, {
+      as: 'publisher',
+      foreignKey: 'userId'
+    });
+    Event.belongsToMany(models.Media, {
+      through: 'EventMedia',
+      as: 'medias',
+      foreignKey: 'eventId'
+    });
+    Event.hasMany(models.EventMedia, {
+      as: 'media',
+      foreignKey: 'eventId'
+    });
   };
   return Event;
 };
