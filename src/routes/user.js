@@ -21,7 +21,7 @@ const {
 } = UserController;
 
 router.post('/follow-or-unfollow', userBouncers, verifyUserAndFollower, followOrUnFollowUser); // ?userId=[]&followerId=[]
-router.get('/profile', userBouncers, getProfile);
+router.get('/profile', userBouncers, getProfile); // id=[]
 router.get('/medias', userBouncers, getProfileMedia);
 router.get('/check-if-following', userBouncers, checkFollowing); // userId=[]
 router.get('/check-if-follower', userBouncers, checkFollower); // userId=[]

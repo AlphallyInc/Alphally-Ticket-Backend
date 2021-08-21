@@ -1,3 +1,4 @@
+import sequelize from 'sequelize';
 import { GeneralService } from '.';
 import database from '../models';
 
@@ -36,17 +37,35 @@ const PostService = {
           {
             model: Like,
             as: 'likes',
-            attributes: ['id']
+            attributes: [[sequelize.fn('count', sequelize.col('likes.id')), 'count']]
           },
           {
             model: PostSeen,
             as: 'seen',
-            attributes: ['id']
+            attributes: [[sequelize.fn('count', sequelize.col('seen.id')), 'count']]
           },
           {
             model: Comment,
             as: 'comments',
-            attributes: ['id', 'comment'],
+            attributes: ['id', 'comment', 'createdAt'],
+            include: [
+              {
+                model: User,
+                as: 'commenter',
+                attributes: ['id', 'name', 'username', 'imageUrl'],
+              },
+              {
+                model: CommentLike,
+                as: 'likes',
+                // group: ['SaleItem.itemId'],
+                attributes: ['commentId', [sequelize.fn('count', sequelize.col('commentId')), 'count']],
+              },
+              {
+                model: Comment,
+                as: 'replyComments',
+                attributes: ['id', 'comment']
+              },
+            ]
           },
           {
             model: PostMedia,
@@ -64,9 +83,22 @@ const PostService = {
         order: [
           ['id', 'DESC']
         ],
+        group: [
+          'Post.id',
+          'publisher.id',
+          'likes.id',
+          'seen.id',
+          'comments.id',
+          'medias.id',
+          'medias->media.id',
+          'comments->commenter.id',
+          'comments->likes.id',
+          'comments->replyComments.id'
+        ],
       });
       return entities;
     } catch (error) {
+      console.error(error);
       throw new Error(error);
     }
   },
