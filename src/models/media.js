@@ -46,6 +46,11 @@ module.exports = (sequelize, DataTypes) => {
       as: 'movies',
       foreignKey: 'mediaId'
     });
+    Media.belongsToMany(models.Event, {
+      through: 'EventMedia',
+      as: 'events',
+      foreignKey: 'mediaId'
+    });
     Media.hasMany(models.MovieMedia, {
       as: 'movie',
       foreignKey: 'mediaId'
