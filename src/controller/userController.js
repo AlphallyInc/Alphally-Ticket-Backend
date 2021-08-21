@@ -60,13 +60,20 @@ const UserController = {
    */
   async getProfile(req, res) {
     try {
-      const { id } = req.tokenData;
+      let id;
+      if (req.query.id) id = req.query.id;
+      else id = req.tokenData.id;
+      if (!id || id === undefined) return errorResponse(res, { code: 401, message: 'Please add an id or authenticate to view profile' });
       let user = await findByKey(User, { id });
       const followersData = await rowCountByKey(Follower, { followerId: id });
       const followingData = await rowCountByKey(Follower, { userId: id });
-      user = { ...user.dataValues, followers: followersData.count, following: followingData.count };
+      const media = await getMedias({ userId: id });
+      user = {
+        ...user.dataValues, followers: followersData.count, following: followingData.count, media
+      };
       return successResponse(res, { message: 'Profile Successfully', user });
     } catch (error) {
+      console.error(error);
       errorResponse(res, { code: 500, message: error });
     }
   },

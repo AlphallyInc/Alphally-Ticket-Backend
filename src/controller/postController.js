@@ -160,7 +160,8 @@ const PostController = {
         ...item.dataValues,
         likes: item.dataValues.likes.length,
         seen: item.dataValues.seen.length,
-        comments: item.dataValues.comments.length
+        noOfComments: item.dataValues.comments.length,
+        comments: item.dataValues.comments
       }));
       if (postData.length) postData = await checkPostLike(postData);
       return successResponse(res, { message: 'Post Gotten Successfully', postData });
@@ -221,7 +222,7 @@ const PostController = {
       let commentData;
       if (req.query.postId) {
         const datas = await getPostCommentsByKey({ id: req.query.postId });
-        commentData = datas[0].comments;
+        commentData = datas.length > 0 ? datas[0].comments : datas;
       }
       if (req.query.commentId) {
         const datas = await getCommentsByKey({ id: req.query.commentId });
