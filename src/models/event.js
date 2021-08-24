@@ -60,6 +60,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: true
     },
+    numberOfTickets: {
+      type: DataTypes.DOUBLE,
+      allowNull: true
+    },
     postId: {
       type: DataTypes.INTEGER,
       allowNull: true

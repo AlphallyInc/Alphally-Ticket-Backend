@@ -46,7 +46,30 @@ const TicketController = {
       });
       return successResponse(res, { message: 'Tickets Purchased Successfully', ticket });
     } catch (error) {
-      console.error(error);
+      errorResponse(res, { code: 500, message: error });
+    }
+  },
+
+  /**
+   * buy a event ticket
+   * @async
+   * @param {object} req
+   * @param {object} res
+   * @returns {JSON} a JSON response with user details and Token
+   * @memberof TicketController
+   */
+  async buyEventTicket(req, res) {
+    try {
+      const { id } = req.tokenData;
+      const { event } = req;
+      const ticketCode = await generateTicketCode(event.title);
+      // const price = Number(req.body.quantity) * movie.ticketPrice * movie.discount;
+      const price = Number(req.body.quantity) * Number(event.ticketPrice);
+      const ticket = await addEntity(Ticket, {
+        ...req.body, userId: id, price, ticketCode
+      });
+      return successResponse(res, { message: 'Tickets Purchased Successfully', ticket });
+    } catch (error) {
       errorResponse(res, { code: 500, message: error });
     }
   },
