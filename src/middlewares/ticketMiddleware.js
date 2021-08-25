@@ -10,7 +10,8 @@ const {
 const {
   validateId,
   validateMovieTickets,
-  validateEventTickets
+  validateEventTickets,
+  validateParameters
 } = GeneralValidation;
 const {
   findByKey
@@ -65,6 +66,32 @@ const TicketMiddleware = {
         if (!event.isAvialable) return errorResponse(res, { code: '404', message: 'Event Ticket Exhausted' });
         if (event.numberOfTickets < Number(req.body.quantity)) return errorResponse(res, { code: '404', message: 'Event Ticket is not enough for purchase' });
         req.event = event;
+      }
+      next();
+    } catch (error) {
+      errorResponse(res, { code: 400, message: error });
+    }
+  },
+
+  /**
+   * middleware for validating query payloads
+   * @async
+   * @param {object} req - the api request
+   * @param {object} res - api response returned by method
+   * @param {object} next - returned values going into next function
+   * @returns {object} - returns error or response object
+   * @memberof TicketMiddleware
+   */
+  async verifyIds(req, res, next) {
+    try {
+      validateParameters(req.query);
+      if (req.query.eventId) {
+        const event = await findByKey(Event, { id: req.body.eventId });
+        if (!event) return errorResponse(res, { code: '404', message: 'Event is not found' });
+      }
+      if (req.query.movieId) {
+        const movie = await findByKey(Movie, { id: req.body.movieId });
+        if (!movie) return errorResponse(res, { code: '404', message: 'Movie is not found' });
       }
       next();
     } catch (error) {

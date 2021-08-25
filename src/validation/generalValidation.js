@@ -20,6 +20,8 @@ const GeneralValidation = {
       title: joi.string().label('Please input a valid post title'),
       body: joi.string().label('Please input a valid post message'),
       privacyId: joi.number().positive().label('Please input a valid privacy id'),
+      movieId: joi.number().positive().label('Please input a valid movie id'),
+      eventId: joi.number().positive().label('Please input a valid event id'),
       name: joi.string().label('Please input a valid cinema name'),
       address: joi.string().label('Please input a valid cinema address'),
       capacity: joi.number().positive().label('Please input a valid cinema capacity'),

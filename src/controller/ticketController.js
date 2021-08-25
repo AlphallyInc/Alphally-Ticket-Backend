@@ -1,5 +1,7 @@
+/* eslint-disable max-len */
+/* eslint-disable no-nested-ternary */
 import qrCode from 'qrcode';
-import { GeneralService, UserService } from '../services';
+import { GeneralService, UserService, AdminService } from '../services';
 import { Toolbox, Payment } from '../utils';
 import database from '../models';
 
@@ -18,8 +20,13 @@ const {
   findByKey
 } = GeneralService;
 const {
-  getMedias
+  getMedias,
 } = UserService;
+const {
+  getTicketByKey,
+  getMovieTicketByKey,
+  getEventTicketByKey
+} = AdminService;
 const {
   Ticket,
   User
@@ -132,6 +139,51 @@ const TicketController = {
   },
 
   /**
+   * get tickets
+   * @async
+   * @param {object} req
+   * @param {object} res
+   * @returns {JSON} a JSON response with user details and Token
+   * @memberof TicketController
+   */
+  async getAllTickets(req, res) {
+    try {
+      let tickets;
+      let numberOfTicketSold = 0;
+      let numberOfTicketsRemaining = 0;
+
+      if (req.query.movieId) {
+        tickets = await getMovieTicketByKey({ movieId: req.query.movieId });
+        numberOfTicketSold = tickets.tickets.reduce((a, b) => Number(a.quantity + b.quantity), numberOfTicketSold);
+        numberOfTicketsRemaining = Number(tickets.numberOfTickets - numberOfTicketSold);
+        if (!tickets) return errorResponse(res, { code: '404', message: 'No Purchase made for this movie' });
+      } else if (req.query.eventId) {
+        tickets = await getEventTicketByKey({ eventId: req.query.eventId });
+        numberOfTicketSold = tickets.tickets.reduce((a, b) => Number(a.quantity + b.quantity), numberOfTicketSold);
+        numberOfTicketsRemaining = Number(tickets.numberOfTickets - numberOfTicketSold);
+        if (!tickets) return errorResponse(res, { code: '404', message: 'No Purchase made for this event' });
+      } else {
+        tickets = await getTicketByKey({});
+        if (!tickets.length) return errorResponse(res, { code: '404', message: 'No Purchase made at all' });
+        // numberOfTicketSold = tickets.reduce((a, b) => Number(a.quantity + b.quantity), numberOfTicketSold);
+        // numberOfTicketsRemaining = Number(tickets.numberOfTickets - numberOfTicketSold);
+      }
+
+      const data = {
+        tickets,
+        numberOfTicketSold,
+        numberOfTicketsRemaining,
+        isAvailable: numberOfTicketsRemaining === 0,
+      };
+
+      return successResponse(res, { message: 'Tickets Gotten Successfully', data });
+    } catch (error) {
+      console.error(error);
+      errorResponse(res, { code: 500, message: error });
+    }
+  },
+
+  /**
    * buy add payment
    * @async
    * @param {object} req
@@ -141,7 +193,7 @@ const TicketController = {
    */
   async makeTicketPayment(req, res) {
     try {
-      const { id, email, name } = req.tokenData;
+      const { email, name } = req.tokenData;
       const { ticket } = req;
       const { ticketCode, price, quantity } = ticket;
       const metadata = {

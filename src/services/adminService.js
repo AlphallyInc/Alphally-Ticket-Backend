@@ -2,7 +2,10 @@ import database from '../models';
 
 const {
   CinemaAddress,
-  Cinema
+  Cinema,
+  Movie,
+  Event,
+  Ticket
 } = database;
 
 const AdminService = {
@@ -20,6 +23,84 @@ const AdminService = {
           {
             model: CinemaAddress,
             as: 'addresses'
+          }
+        ],
+        where: key,
+      });
+      return entities;
+    } catch (error) {
+      throw new Error(error);
+    }
+  },
+
+  /**
+   * Get tickets for a movie of an event
+   * @async
+   * @param {object} key - id
+   * @returns {promise-Object} - A promise object with entity details
+   * @memberof AdminService
+   */
+  async getTicketByKey(key) {
+    try {
+      const entities = await Ticket.findAll({
+        include: [
+          {
+            model: Movie,
+            as: 'movie',
+            attributes: ['title']
+          },
+          {
+            model: Event,
+            as: 'event',
+            attributes: ['name']
+          }
+        ],
+        where: key,
+      });
+      return entities;
+    } catch (error) {
+      throw new Error(error);
+    }
+  },
+
+  /**
+   * Get tickets for a movie of an event
+   * @async
+   * @param {object} key - id
+   * @returns {promise-Object} - A promise object with entity details
+   * @memberof AdminService
+   */
+  async getMovieTicketByKey(key) {
+    try {
+      const entities = await Movie.fineOne({
+        include: [
+          {
+            model: Ticket,
+            as: 'tickets',
+          }
+        ],
+        where: key,
+      });
+      return entities;
+    } catch (error) {
+      throw new Error(error);
+    }
+  },
+
+  /**
+   * Get tickets for a movie of an event
+   * @async
+   * @param {object} key - id
+   * @returns {promise-Object} - A promise object with entity details
+   * @memberof AdminService
+   */
+  async getEventTicketByKey(key) {
+    try {
+      const entities = await Event.findOne({
+        include: [
+          {
+            model: Ticket,
+            as: 'tickets',
           }
         ],
         where: key,
