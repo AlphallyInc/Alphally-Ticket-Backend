@@ -121,6 +121,10 @@ module.exports = (sequelize, DataTypes) => {
       as: 'media',
       foreignKey: 'eventId'
     });
+    Event.hasMany(models.Ticket, {
+      as: 'tickets',
+      foreignKey: 'eventId'
+    });
   };
   return Event;
 };

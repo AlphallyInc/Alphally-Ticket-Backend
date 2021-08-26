@@ -47,12 +47,12 @@ const AdminService = {
           {
             model: Movie,
             as: 'movie',
-            attributes: ['title']
+            attributes: ['title', 'numberOfTickets', 'isAvialable']
           },
           {
             model: Event,
             as: 'event',
-            attributes: ['name']
+            attributes: ['name', 'numberOfTickets', 'isAvialable']
           }
         ],
         where: key,
@@ -72,11 +72,15 @@ const AdminService = {
    */
   async getMovieTicketByKey(key) {
     try {
-      const entities = await Movie.fineOne({
+      const entities = await Movie.findOne({
         include: [
           {
             model: Ticket,
             as: 'tickets',
+            required: true,
+            where: {
+              paymentStatus: 'completed'
+            }
           }
         ],
         where: key,
@@ -101,6 +105,10 @@ const AdminService = {
           {
             model: Ticket,
             as: 'tickets',
+            required: true,
+            where: {
+              paymentStatus: 'completed'
+            }
           }
         ],
         where: key,

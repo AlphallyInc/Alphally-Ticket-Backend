@@ -29,7 +29,9 @@ const {
 } = AdminService;
 const {
   Ticket,
-  User
+  User,
+  Movie,
+  Event
 } = database;
 
 const TicketController = {
@@ -45,12 +47,18 @@ const TicketController = {
     try {
       const { id } = req.tokenData;
       const { movie } = req;
-      const ticketCode = await generateTicketCode(movie.title);
-      // const price = Number(req.body.quantity) * movie.ticketPrice * movie.discount;
-      const price = Number(req.body.quantity) * Number(movie.ticketPrice);
-      const ticket = await addEntity(Ticket, {
-        ...req.body, userId: id, price, ticketCode
-      });
+      let ticket;
+
+      if (req.ticketData) {
+        ticket = await updateByKey(Ticket, { quantity: req.body.quantity }, { id: req.ticketData.id });
+      } else {
+        const ticketCode = await generateTicketCode(movie.title);
+        // const price = Number(req.body.quantity) * movie.ticketPrice * movie.discount;
+        const price = Number(req.body.quantity) * Number(movie.ticketPrice);
+        ticket = await addEntity(Ticket, {
+          ...req.body, userId: id, price, ticketCode
+        });
+      }
       return successResponse(res, { message: 'Tickets Purchased Successfully', ticket });
     } catch (error) {
       errorResponse(res, { code: 500, message: error });
@@ -69,14 +77,21 @@ const TicketController = {
     try {
       const { id } = req.tokenData;
       const { event } = req;
-      const ticketCode = await generateTicketCode(event.title);
-      // const price = Number(req.body.quantity) * movie.ticketPrice * movie.discount;
-      const price = Number(req.body.quantity) * Number(event.ticketPrice);
-      const ticket = await addEntity(Ticket, {
-        ...req.body, userId: id, price, ticketCode
-      });
+      let ticket;
+
+      if (req.ticketData) {
+        ticket = await updateByKey(Ticket, { quantity: req.body.quantity }, { id: req.ticketData.id });
+      } else {
+        const ticketCode = await generateTicketCode(event.name);
+        // const price = Number(req.body.quantity) * movie.ticketPrice * movie.discount;
+        const price = Number(req.body.quantity) * Number(event.ticketPrice);
+        ticket = await addEntity(Ticket, {
+          ...req.body, userId: id, price, ticketCode
+        });
+      }
       return successResponse(res, { message: 'Tickets Purchased Successfully', ticket });
     } catch (error) {
+      console.error(error);
       errorResponse(res, { code: 500, message: error });
     }
   },
@@ -94,18 +109,39 @@ const TicketController = {
       let barCode;
       const { name } = req.tokenData;
       const { ticket } = req;
-      const { paystackReference, ticketCode, quantity } = ticket;
+      const {
+        paystackReference, ticketCode, quantity, movieId, eventId
+      } = ticket;
+
       if (!paystackReference || paystackReference === null) return errorResponse(res, { code: '400', message: 'Payment has not be made yet' });
       const check = await validatePaystack(paystackReference);
       const { status } = check.data;
       if (status === 'abandoned') return errorResponse(res, { code: '400', message: 'Error with Payment, Please Try again!' });
-      if (status === 'failed') return errorResponse(res, { code: '400', message: 'Payment Failed, Please Try again!' });
+      if (status === 'failed') {
+        await updateByKey(Ticket, { paymentStatus: 'rejected' }, { id: ticket.id });
+        return errorResponse(res, { code: '400', message: 'Payment Failed, Please Try again!' });
+      }
       if (status === 'success') {
+        await updateByKey(Ticket, { paymentStatus: 'completed' }, { id: ticket.id });
         const metadata = {
           ticketCode,
           quantity,
           name
         };
+
+        if (movieId !== null) {
+          const movie = await findByKey(Movie, { id: movieId });
+          let { numberOfTickets, isAvailable } = movie;
+          numberOfTickets = Number(numberOfTickets - quantity);
+          isAvailable = numberOfTickets >= 1;
+          await updateByKey(Movie, { numberOfTickets, isAvailable }, { id: movieId });
+        } else if (eventId !== null) {
+          const event = await findByKey(Event, { id: eventId });
+          let { numberOfTickets, isAvailable } = event;
+          numberOfTickets = Number(numberOfTickets - quantity);
+          isAvailable = numberOfTickets >= 1;
+          await updateByKey(Movie, { numberOfTickets, isAvailable }, { id: eventId });
+        }
         barCode = await qrCode.toDataURL(JSON.stringify(metadata));
       }
       return successResponse(res, { message: 'Ticket Payment Successfully', barCode });
@@ -153,13 +189,17 @@ const TicketController = {
       let numberOfTicketsRemaining = 0;
 
       if (req.query.movieId) {
-        tickets = await getMovieTicketByKey({ movieId: req.query.movieId });
-        numberOfTicketSold = tickets.tickets.reduce((a, b) => Number(a.quantity + b.quantity), numberOfTicketSold);
+        tickets = await getMovieTicketByKey({ id: req.query.movieId });
+        if (!tickets) return errorResponse(res, { code: 404, message: 'No ticket found' });
+        const ticketss = tickets.tickets.map((item) => item.quantity);
+        numberOfTicketSold = ticketss.reduce((a, b) => Number(a + b), numberOfTicketSold);
         numberOfTicketsRemaining = Number(tickets.numberOfTickets - numberOfTicketSold);
         if (!tickets) return errorResponse(res, { code: '404', message: 'No Purchase made for this movie' });
       } else if (req.query.eventId) {
-        tickets = await getEventTicketByKey({ eventId: req.query.eventId });
-        numberOfTicketSold = tickets.tickets.reduce((a, b) => Number(a.quantity + b.quantity), numberOfTicketSold);
+        tickets = await getEventTicketByKey({ id: req.query.eventId });
+        if (!tickets) return errorResponse(res, { code: 404, message: 'No ticket found' });
+        const ticketss = tickets.tickets.map((item) => item.quantity);
+        numberOfTicketSold = ticketss.reduce((a, b) => Number(a + b), numberOfTicketSold);
         numberOfTicketsRemaining = Number(tickets.numberOfTickets - numberOfTicketSold);
         if (!tickets) return errorResponse(res, { code: '404', message: 'No Purchase made for this event' });
       } else {
@@ -199,7 +239,7 @@ const TicketController = {
       const metadata = {
         ticketCode,
         quantity,
-        name
+        name,
       };
 
       // TODO: Uncomment code below before production

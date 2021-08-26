@@ -5,7 +5,8 @@ import { TicketController } from '../controller';
 
 const router = Router();
 const {
-  userBouncers
+  userBouncers,
+  adminBouncers
 } = Bouncers;
 const {
   validateMovieTicketPayload,
@@ -27,6 +28,6 @@ router.patch('/buy', userBouncers, verifyTicket, makeTicketPayment); // ?ticketi
 router.get('/verify', userBouncers, verifyTicket, verifyPayment); // ?ticketid=[]
 router.get('/verification', userBouncers, verificationCheck); // ?ticketCode=[]
 router.post('/event', userBouncers, validateEventTicketPayload, buyEventTicket);
-router.get('/event', userBouncers, verifyIds, getAllTickets); // movieId=[] || eventId=[]
+router.get('/', adminBouncers, verifyIds, getAllTickets); // movieId=[] || eventId=[]
 
 export default router;
