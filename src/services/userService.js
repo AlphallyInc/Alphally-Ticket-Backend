@@ -7,7 +7,9 @@ const {
   MovieMedia,
   Movie,
   Post,
-  PostMedia
+  PostMedia,
+  Event,
+  Ticket
 } = database;
 
 const UserService = {

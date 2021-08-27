@@ -60,6 +60,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: true
     },
+    numberOfTickets: {
+      type: DataTypes.DOUBLE,
+      allowNull: true
+    },
     postId: {
       type: DataTypes.INTEGER,
       allowNull: true
@@ -115,6 +119,10 @@ module.exports = (sequelize, DataTypes) => {
     });
     Event.hasMany(models.EventMedia, {
       as: 'media',
+      foreignKey: 'eventId'
+    });
+    Event.hasMany(models.Ticket, {
+      as: 'tickets',
       foreignKey: 'eventId'
     });
   };
