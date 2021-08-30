@@ -51,7 +51,7 @@ const UserController = {
       } else {
         followData = await addEntity(Follower, { userId: id, followerId });
         await addEntity(Activity, {
-          userId: id, activity: `${req.follower.name} Followed You`, activityUserId: followerId, followingId: followerId
+          userId: id, activity: `${req.follower.name} Followed You`, activityUserId: followerId, followingId: followerId, type: 'follower'
         });
       }
       return successResponse(res, {
