@@ -77,12 +77,14 @@ const PostMiddleware = {
         validateId({ id: req.query.postId });
         const post = await findByKey(Post, { id: req.query.postId });
         if (!post) return errorResponse(res, { code: 404, message: 'Post is Not Found' });
+        req.post = post;
       }
       if (req.body.postId) {
         validateId({ id: req.query.postId });
         validateComment({ ...req.body });
         const post = await findByKey(Post, { id: req.query.postId });
         if (!post) return errorResponse(res, { code: 404, message: 'Post is Not Found' });
+        req.post = post;
       }
       next();
     } catch (error) {

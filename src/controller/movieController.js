@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import { GeneralService, MovieService } from '../services';
+import { GeneralService, MovieService, UserService } from '../services';
 import { Toolbox, Helpers } from '../utils';
 import database from '../models';
 
@@ -16,6 +16,10 @@ const {
   allEntities,
   findMultipleByKey
 } = GeneralService;
+const {
+  getFollowData,
+  addAllActivities
+} = UserService;
 const {
   uploadAllImages,
   uploadAllVideos
@@ -49,7 +53,7 @@ const MovieController = {
       let mediaPayload;
       let thumbnailMedia;
       let media;
-      const { id } = req.tokenData;
+      const { id, name } = req.tokenData;
       const postBody = req.body.post;
       const { cinemaIds, genreIds } = req.body;
       delete req.body.post;
@@ -104,8 +108,11 @@ const MovieController = {
           await updateByKey(Movie, { postId: post.id }, { id: movie.id });
         }
       }
+      // activities
+      const followData = await getFollowData({ id });
+      await addAllActivities(followData, `${name} added a new movie`, movie.id, 'movie', id);
       return successResponse(res, {
-        message: 'Post Added Successfully', movie, media, mediaMovie
+        message: 'Movie Added Successfully', movie, media, mediaMovie
       });
     } catch (error) {
       console.error(error);
