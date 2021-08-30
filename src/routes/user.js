@@ -8,7 +8,8 @@ const {
   userBouncers
 } = Bouncers;
 const {
-  verifyUserAndFollower
+  verifyUserAndFollower,
+  verifyUserActivity
 } = UserMiddleware;
 const {
   followOrUnFollowUser,
@@ -17,7 +18,8 @@ const {
   checkFollower,
   listFollowers,
   getPrivacy,
-  getProfileMedia
+  getProfileMedia,
+  getActivities
 } = UserController;
 
 router.post('/follow-or-unfollow', userBouncers, verifyUserAndFollower, followOrUnFollowUser); // ?userId=[]&followerId=[]
@@ -27,5 +29,6 @@ router.get('/check-if-following', userBouncers, checkFollowing); // userId=[]
 router.get('/check-if-follower', userBouncers, checkFollower); // userId=[]
 router.get('/list-followers', userBouncers, listFollowers);
 router.get('/privacy', userBouncers, getPrivacy);
+router.get('/activity', userBouncers, verifyUserActivity, getActivities); // eventId=[] | postId=[] | movieId=[] | followerId=[] | commentId=[] | likeId=[]
 
 export default router;

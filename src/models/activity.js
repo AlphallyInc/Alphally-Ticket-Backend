@@ -19,6 +19,16 @@ module.exports = (sequelize, DataTypes) => {
       onUpdate: 'CASCADE',
       onDelete: 'CASCADE'
     },
+    activityUserId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: 'User',
+        key: 'id'
+      },
+      onUpdate: 'CASCADE',
+      onDelete: 'CASCADE'
+    },
     movieId: {
       type: DataTypes.INTEGER,
       allowNull: true,
@@ -72,8 +82,12 @@ module.exports = (sequelize, DataTypes) => {
   }, {});
   Activity.associate = (models) => {
     Activity.belongsTo(models.Event, {
-      as: 'categories',
-      foreignKey: 'categoryId'
+      as: 'event',
+      foreignKey: 'eventId'
+    });
+    Activity.belongsTo(models.User, {
+      as: 'activityUser',
+      foreignKey: 'activityUserId'
     });
   };
   return Activity;

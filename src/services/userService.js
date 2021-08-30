@@ -9,7 +9,10 @@ const {
   Post,
   PostMedia,
   Event,
-  Ticket
+  Ticket,
+  Comment,
+  Like,
+  Activity
 } = database;
 
 const UserService = {
@@ -30,6 +33,131 @@ const UserService = {
             where: {
               followerId: key.id
             }
+          }
+        ],
+        where: key,
+      });
+      return entities;
+    } catch (error) {
+      throw new Error(error);
+    }
+  },
+
+  /**
+   * Get user post activity
+   * @async
+   * @param {object} key - inputs like names or tags
+   * @returns {promise-Object} - A promise object with entity details
+   * @memberof UserService
+   */
+  async getPostActivity(key) {
+    try {
+      const entities = await Activity.findAll({
+        include: [
+          {
+            model: Post,
+            as: 'post',
+            attributes: ['id', 'title', 'thumbnail'],
+          }
+        ],
+        where: key,
+      });
+      return entities;
+    } catch (error) {
+      throw new Error(error);
+    }
+  },
+
+  /**
+   * Get user event activity
+   * @async
+   * @param {object} key - inputs like names or tags
+   * @returns {promise-Object} - A promise object with entity details
+   * @memberof UserService
+   */
+  async getEventActivity(key) {
+    try {
+      const entities = await Activity.findAll({
+        include: [
+          {
+            model: Event,
+            as: 'event',
+            attributes: ['id', 'name', 'thumbnail'],
+          }
+        ],
+        where: key,
+      });
+      return entities;
+    } catch (error) {
+      throw new Error(error);
+    }
+  },
+
+  /**
+   * Get user movie activity
+   * @async
+   * @param {object} key - inputs like names or tags
+   * @returns {promise-Object} - A promise object with entity details
+   * @memberof UserService
+   */
+  async getMovieActivity(key) {
+    try {
+      const entities = await Activity.findAll({
+        include: [
+          {
+            model: Movie,
+            as: 'movie',
+            attributes: ['id', 'title', 'thumbnail'],
+          }
+        ],
+        where: key,
+      });
+      return entities;
+    } catch (error) {
+      throw new Error(error);
+    }
+  },
+
+  /**
+   * Get user event activity
+   * @async
+   * @param {object} key - inputs like names or tags
+   * @returns {promise-Object} - A promise object with entity details
+   * @memberof UserService
+   */
+  async getCommentActivity(key) {
+    try {
+      const entities = await Activity.findAll({
+        include: [
+          {
+            model: Event,
+            as: 'event',
+            attributes: ['id', 'name', 'thumbnail'],
+          }
+        ],
+        where: key,
+      });
+      return entities;
+    } catch (error) {
+      throw new Error(error);
+    }
+  },
+
+  /**
+   * Get user activity
+   * @async
+   * @param {object} key - inputs like names or tags
+   * @returns {promise-Object} - A promise object with entity details
+   * @memberof UserService
+   */
+  async getActivitiesByKey(key) {
+    try {
+      const entities = await Activity.findAll({
+        include: [
+          {
+            model: User,
+            as: 'activityUser',
+            attributes: ['id', 'name', 'imageUrl', 'username'],
           }
         ],
         where: key,

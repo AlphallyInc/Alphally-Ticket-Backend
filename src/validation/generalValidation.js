@@ -14,6 +14,7 @@ const GeneralValidation = {
   validateParameters(payload) {
     const schema = {
       type: joi.string().label('Please input a valid privacy type'),
+      activityType: joi.string().valid('general', 'post', 'event', 'movie', 'following').label('Please input a valid privacy type'),
       description: joi.string().label('Please input a valid privacy description'),
       id: joi.number().positive().label('Please enter a positive number for id parameter'),
       email: joi.string().email().label('Please enter a valid email address'),
