@@ -203,6 +203,7 @@ const GeneralValidation = {
       duration: joi.string().required().label("Please duration should be for example '90 minutes' to be valid"),
       numberOfTickets: joi.number().positive().required().label('Please input a valid number of tickets'),
       privacyId: joi.number().integer().positive().label('Please input a valid privacy value'),
+      thumbnailId: joi.number().integer().positive().label('Please input a valid thumbnail value'),
       cinemaIds: joi.array().items(joi.number().positive().required()).label('Please input a valid cinema address'),
       mediaIds: joi.array().items(joi.number().positive().required()).label('Please input a valid media Ids'),
       genreIds: joi.array().items(joi.number().positive().required()).label('Please input a valid genres'),

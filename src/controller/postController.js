@@ -139,6 +139,7 @@ const PostController = {
       }
       return successResponse(res, { message: 'Media Added Successfully', media });
     } catch (error) {
+      console.error(error);
       errorResponse(res, { code: 500, message: error });
     }
   },

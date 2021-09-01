@@ -21,13 +21,13 @@ const {
   uploadAllVideos
 } = Helpers;
 const {
+  getFollowData,
+  addAllActivities
+} = UserService;
+const {
   recursiveCategories,
   getEventByKey,
-  addAllActivities
 } = EventService;
-const {
-  getFollowData,
-} = UserService;
 const {
   PostMedia,
   EventMedia,
@@ -66,8 +66,9 @@ const EventController = {
       else if (req.body.numberOfTickets <= 0) req.body = { ...req.body, isAvialable: false };
       else req.body = { ...req.body, isAvialable: true };
       if (req.body.trailer) mediaTrailer = await findByKey(Media, { url: req.body.trailer });
+      // if (mediaTrailer) body = { ...req.body, trailer: mediaTrailer.url, userId: id };
       if (req.body.thumbnailId) thumbnailUrl = await findByKey(Media, { id: req.body.thumbnailId });
-      if (thumbnailUrl) body = { ...req.body, trailer: thumbnailUrl.url, userId: id };
+      if (thumbnailUrl) body = { ...req.body, thumbnail: thumbnailUrl.url, userId: id };
       const event = await addEntity(Event, body);
       const eventId = event.id;
       const movieCategoryPayload = categoryIds.map((item) => ({ eventId, categoryId: Number(item) }));
@@ -94,6 +95,7 @@ const EventController = {
         message: 'Event Added Successfully', event, eventMedia
       });
     } catch (error) {
+      console.error(error);
       errorResponse(res, { code: 500, message: error });
     }
   },

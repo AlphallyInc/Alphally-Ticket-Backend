@@ -12,6 +12,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: true
     },
+    trailer: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
     releaseDate: {
       type: DataTypes.STRING,
       allowNull: true
