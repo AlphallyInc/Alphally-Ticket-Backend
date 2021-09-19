@@ -45,7 +45,7 @@ const TicketMiddleware = {
         const ticket = await findByKey(Ticket, { userId: req.tokenData.id, movieId: req.body.movieId });
         if (ticket) {
           const { paymentStatus } = ticket;
-          if (paymentStatus !== 'pending') return errorResponse(res, { code: 401, message: 'You already have bought ticket(s) for this movie' });
+          if (paymentStatus === 'success') return errorResponse(res, { code: 401, message: 'You already have bought ticket(s) for this movie' });
           req.ticketData = ticket;
         }
         req.movie = movie;

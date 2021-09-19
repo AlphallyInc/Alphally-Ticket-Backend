@@ -45,7 +45,7 @@ const TicketController = {
    */
   async buyMovieTicket(req, res) {
     try {
-      const { id } = req.tokenData;
+      const { id, name, email } = req.tokenData;
       const { movie } = req;
       let ticket;
 
@@ -59,7 +59,26 @@ const TicketController = {
           ...req.body, userId: id, price, ticketCode
         });
       }
-      return successResponse(res, { message: 'Tickets Purchased Successfully', ticket });
+      const { ticketCode, price, quantity } = ticket;
+      const metadata = {
+        ticketCode,
+        quantity,
+        name,
+      };
+
+      // TODO: Uncomment code below before production
+      const payload = {
+        email,
+        amount: Number(price) * 100,
+        metadata,
+      };
+
+      // return console.log(payload);
+      let paystack = await viaPaystack(payload);
+      if (!paystack.status) errorResponse(res, { code: 400, message: paystack.message });
+      paystack = paystack.data;
+      await updateByKey(Ticket, { paystackReference: paystack.reference }, { id: ticket.id });
+      return successResponse(res, { message: 'Tickets Created Successfully', ticket: { ...ticket.dataValues, paystack } });
     } catch (error) {
       errorResponse(res, { code: 500, message: error });
     }
@@ -75,7 +94,7 @@ const TicketController = {
    */
   async buyEventTicket(req, res) {
     try {
-      const { id } = req.tokenData;
+      const { id, name, email } = req.tokenData;
       const { event } = req;
       let ticket;
 
@@ -89,7 +108,26 @@ const TicketController = {
           ...req.body, userId: id, price, ticketCode
         });
       }
-      return successResponse(res, { message: 'Tickets Purchased Successfully', ticket });
+      const { ticketCode, price, quantity } = ticket;
+      const metadata = {
+        ticketCode,
+        quantity,
+        name,
+      };
+
+      // TODO: Uncomment code below before production
+      const payload = {
+        email,
+        amount: Number(price) * 100,
+        metadata,
+      };
+
+      // return console.log(payload);
+      let paystack = await viaPaystack(payload);
+      if (!paystack.status) errorResponse(res, { code: 400, message: paystack.message });
+      paystack = paystack.data;
+      await updateByKey(Ticket, { paystackReference: paystack.reference }, { id: ticket.id });
+      return successResponse(res, { message: 'Tickets Created Successfully', ticket: { ...ticket.dataValues, paystack } });
     } catch (error) {
       console.error(error);
       errorResponse(res, { code: 500, message: error });
