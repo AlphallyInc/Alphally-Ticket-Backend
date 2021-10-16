@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import { GeneralService, EventService } from '../services';
+import { GeneralService, EventService, UserService } from '../services';
 import { Toolbox, Helpers } from '../utils';
 import database from '../models';
 
@@ -21,8 +21,12 @@ const {
   uploadAllVideos
 } = Helpers;
 const {
+  getFollowData,
+  addAllActivities
+} = UserService;
+const {
   recursiveCategories,
-  getEventByKey
+  getEventByKey,
 } = EventService;
 const {
   PostMedia,
@@ -33,6 +37,7 @@ const {
   EventCategory,
   MovieGenre,
   Category,
+  Follower
 } = database;
 
 const EventController = {
@@ -50,7 +55,7 @@ const EventController = {
       let media;
       let thumbnailUrl;
       let mediaTrailer;
-      const { id } = req.tokenData;
+      const { id, name } = req.tokenData;
       const postBody = req.body.post;
       const { categoryIds, mediaIds } = req.body;
       delete req.body.post;
@@ -61,18 +66,20 @@ const EventController = {
       else if (req.body.numberOfTickets <= 0) req.body = { ...req.body, isAvialable: false };
       else req.body = { ...req.body, isAvialable: true };
       if (req.body.trailer) mediaTrailer = await findByKey(Media, { url: req.body.trailer });
+      // if (mediaTrailer) body = { ...req.body, trailer: mediaTrailer.url, userId: id };
       if (req.body.thumbnailId) thumbnailUrl = await findByKey(Media, { id: req.body.thumbnailId });
-      if (thumbnailUrl) body = { ...req.body, trailer: thumbnailUrl.url, userId: id };
+      if (thumbnailUrl) body = { ...req.body, thumbnail: thumbnailUrl.url, userId: id };
       const event = await addEntity(Event, body);
-      const movieCategoryPayload = categoryIds.map((item) => ({ eventId: event.id, categoryId: Number(item) }));
+      const eventId = event.id;
+      const movieCategoryPayload = categoryIds.map((item) => ({ eventId, categoryId: Number(item) }));
       await EventCategory.bulkCreate(movieCategoryPayload);
-      const mediaMoviePayload = mediaIds.map((item) => ({ mediaId: Number(item), eventId: event.id }));
-      if (thumbnailUrl) mediaMoviePayload.unshift({ mediaId: req.body.thumbnailId, eventId: event.id });
-      if (mediaTrailer) mediaMoviePayload.unshift({ mediaId: mediaTrailer.id, eventId: event.id });
+      const mediaMoviePayload = mediaIds.map((item) => ({ mediaId: Number(item), eventId }));
+      if (thumbnailUrl) mediaMoviePayload.unshift({ mediaId: req.body.thumbnailId, eventId });
+      if (mediaTrailer) mediaMoviePayload.unshift({ mediaId: mediaTrailer.id, eventId });
       const eventMedia = await EventMedia.bulkCreate(mediaMoviePayload);
       if (event && eventMedia) {
         if (postBody) {
-          const post = await addEntity(Post, { ...postBody, userId: id, eventId: event.id });
+          const post = await addEntity(Post, { ...postBody, userId: id, eventId });
           const mediaPostPayload = mediaIds.map((item) => ({ mediaId: Number(item), postId: post.id }));
           if (thumbnailUrl) mediaPostPayload.unshift({ mediaId: req.body.thumbnailId, postId: post.id });
           if (mediaTrailer) mediaPostPayload.unshift({ mediaId: mediaTrailer.id, postId: post.id });
@@ -80,10 +87,15 @@ const EventController = {
           await updateByKey(Event, { postId: post.id }, { id: event.id });
         }
       }
+
+      // activities
+      const followData = await getFollowData({ id });
+      await addAllActivities(followData, `${name} added a new event`, eventId, 'event', id);
       return successResponse(res, {
         message: 'Event Added Successfully', event, eventMedia
       });
     } catch (error) {
+      console.error(error);
       errorResponse(res, { code: 500, message: error });
     }
   },

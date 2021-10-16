@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import { GeneralService, PostService } from '../services';
+import { GeneralService, PostService, UserService } from '../services';
 import { Toolbox, Helpers } from '../utils';
 import database from '../models';
 
@@ -12,6 +12,10 @@ const {
   uploadAllImages,
   uploadAllVideos
 } = Helpers;
+const {
+  getFollowData,
+  addAllActivities
+} = UserService;
 const {
   addEntity,
   deleteByKey,
@@ -30,6 +34,7 @@ const {
   Like,
   Media,
   Comment,
+  Activity,
   PostSeen,
   PostMedia,
   CommentLike
@@ -51,7 +56,7 @@ const PostController = {
       let post;
       let mediaPostPayload;
       let mediaPost;
-      const { id } = req.tokenData;
+      const { id, name } = req.tokenData;
       if (req.files && req.files.length) {
         let imageMediaPayload;
         let videoMediaPayload;
@@ -85,6 +90,9 @@ const PostController = {
           mediaPost = await PostMedia.bulkCreate(mediaPostPayload);
         }
       }
+      // activities
+      const followData = await getFollowData({ id });
+      await addAllActivities(followData, `${name} added a new post`, post.id, 'post', id);
       return successResponse(res, {
         message: 'Post Added Successfully', post, media, mediaPost
       });
@@ -131,6 +139,7 @@ const PostController = {
       }
       return successResponse(res, { message: 'Media Added Successfully', media });
     } catch (error) {
+      console.error(error);
       errorResponse(res, { code: 500, message: error });
     }
   },
@@ -160,7 +169,8 @@ const PostController = {
         ...item.dataValues,
         likes: item.dataValues.likes.length,
         seen: item.dataValues.seen.length,
-        comments: item.dataValues.comments.length
+        noOfComments: item.dataValues.comments.length,
+        comments: item.dataValues.comments
       }));
       if (postData.length) postData = await checkPostLike(postData);
       return successResponse(res, { message: 'Post Gotten Successfully', postData });
@@ -221,7 +231,7 @@ const PostController = {
       let commentData;
       if (req.query.postId) {
         const datas = await getPostCommentsByKey({ id: req.query.postId });
-        commentData = datas[0].comments;
+        commentData = datas.length > 0 ? datas[0].comments : datas;
       }
       if (req.query.commentId) {
         const datas = await getCommentsByKey({ id: req.query.commentId });
@@ -284,9 +294,12 @@ const PostController = {
    */
   async addPostComment(req, res) {
     try {
-      const { id } = req.tokenData;
+      const { id, name } = req.tokenData;
       const { postId } = req.query;
       const comment = await addEntity(Comment, { ...req.body, postId, userId: id });
+      await addEntity(Activity, {
+        userId: req.post.userId, activity: `${name} commented on your post`, activityUserId: id, postId, type: 'comment', commentId: comment.id
+      });
       return successResponse(res, { message: 'Comment Added Successfully', comment });
     } catch (error) {
       errorResponse(res, { code: 500, message: error });
@@ -306,7 +319,9 @@ const PostController = {
       let like;
       // let like;
       const { postId } = req.query;
-      const { id } = req.tokenData;
+      const post = await findByKey(Post, { id: postId });
+      if (!post) return errorResponse(res, { code: 404, message: 'Post Not Found' });
+      const { id, name } = req.tokenData;
       like = await findByKey(Like, { userId: id, postId });
       if (like) {
         like = await deleteByKey(Like, { userId: id, postId });
@@ -314,6 +329,10 @@ const PostController = {
       } else {
         like = await addEntity(Like, { userId: id, postId });
         like = true;
+        // const user = await findByKey(User, {})
+        await addEntity(Activity, {
+          userId: post.userId, activity: `${name} Liked Your Post`, activityUserId: id, postId, type: 'like', likeId: like.id
+        });
       }
       return successResponse(res, {
         message: like ? 'You Like A Post' : 'You Unliked A Post',
@@ -337,13 +356,18 @@ const PostController = {
       let like;
       // let like;
       const { commentId } = req.query;
-      const { id } = req.tokenData;
+      const { id, name } = req.tokenData;
+      const comment = await findByKey(Comment, { id: commentId });
+      if (!comment) return errorResponse(res, { code: 404, message: 'Comment Not Found' });
       like = await findByKey(CommentLike, { userId: id, commentId });
       if (like) {
         like = await deleteByKey(CommentLike, { userId: id, commentId });
         like = false;
       } else {
         like = await addEntity(CommentLike, { userId: id, commentId });
+        await addEntity(Activity, {
+          userId: comment.userId, activity: `${name} Liked Your Comment`, activityUserId: id, postId: comment.postId, type: 'like', commentId: comment.id
+        });
         like = true;
       }
       return successResponse(res, {

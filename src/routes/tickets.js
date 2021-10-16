@@ -5,22 +5,32 @@ import { TicketController } from '../controller';
 
 const router = Router();
 const {
-  userBouncers
+  userBouncers,
+  adminBouncers
 } = Bouncers;
 const {
-  verifyTicketPayload,
-  verifyTicket
+  validateMovieTicketPayload,
+  validateEventTicketPayload,
+  verifyTicket,
+  verifyIds,
+  verifyPersonalTickets
 } = TicketMiddleware;
 const {
   buyMovieTicket,
+  buyEventTicket,
   makeTicketPayment,
   verifyPayment,
-  verificationCheck
+  verificationCheck,
+  getAllTickets,
+  getPersonalTickets
 } = TicketController;
 
-router.post('/movie', userBouncers, verifyTicketPayload, buyMovieTicket);
-router.patch('/movie', userBouncers, verifyTicket, makeTicketPayment); // ?ticketid=[]
-router.get('/movie/verify', userBouncers, verifyTicket, verifyPayment); // ?ticketid=[]
-router.get('/movie/verification', userBouncers, verificationCheck); // ?ticketCode=[]
+router.post('/movie', userBouncers, validateMovieTicketPayload, buyMovieTicket);
+router.patch('/buy', userBouncers, verifyTicket, makeTicketPayment); // ?ticketid=[]
+router.get('/verify', userBouncers, verifyTicket, verifyPayment); // ?ticketid=[]
+router.get('/verification', userBouncers, verificationCheck); // ?ticketCode=[]
+router.post('/event', userBouncers, validateEventTicketPayload, buyEventTicket);
+router.get('/', adminBouncers, verifyIds, getAllTickets); // movieId=[] || eventId=[]
+router.get('/personal', userBouncers, verifyPersonalTickets, getPersonalTickets);
 
 export default router;

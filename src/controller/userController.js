@@ -14,12 +14,20 @@ const {
   allEntities
 } = GeneralService;
 const {
-  getMedias
+  getMedias,
+  getPostActivity,
+  getEventActivity,
+  getMovieActivity,
+  getCommentActivity,
+  getLikeActivity,
+  getFolllowerActivity,
+  getActivitiesByKey
 } = UserService;
 const {
   User,
   Follower,
-  Privacy
+  Privacy,
+  Activity
 } = database;
 
 const UserController = {
@@ -40,7 +48,12 @@ const UserController = {
       if (followerData) {
         followData = await deleteByKey(Follower, { userId: id, followerId });
         followData = false;
-      } else followData = await addEntity(Follower, { userId: id, followerId });
+      } else {
+        followData = await addEntity(Follower, { userId: id, followerId });
+        await addEntity(Activity, {
+          userId: id, activity: `${req.follower.name} Followed You`, activityUserId: followerId, followingId: followerId, type: 'follower'
+        });
+      }
       return successResponse(res, {
         message: followerData ? 'User Unfollowed Successfully' : 'Followed Successfully',
         followData
@@ -60,13 +73,51 @@ const UserController = {
    */
   async getProfile(req, res) {
     try {
-      const { id } = req.tokenData;
+      let id;
+      if (req.query.id) id = req.query.id;
+      else id = req.tokenData.id;
+      if (!id || id === undefined) return errorResponse(res, { code: 401, message: 'Please add an id or authenticate to view profile' });
       let user = await findByKey(User, { id });
       const followersData = await rowCountByKey(Follower, { followerId: id });
       const followingData = await rowCountByKey(Follower, { userId: id });
-      user = { ...user.dataValues, followers: followersData.count, following: followingData.count };
+      const media = await getMedias({ userId: id });
+      user = {
+        ...user.dataValues, followers: followersData.count, following: followingData.count, media
+      };
       return successResponse(res, { message: 'Profile Successfully', user });
     } catch (error) {
+      console.error(error);
+      errorResponse(res, { code: 500, message: error });
+    }
+  },
+
+  /**
+   * get user activity
+   * @async
+   * @param {object} req
+   * @param {object} res
+   * @returns {JSON} a JSON response with user details and Token
+   * @memberof UserController
+   */
+  async getActivities(req, res) {
+    try {
+      const { id } = req.tokenData;
+      const {
+        postId, eventId, movieId, commentId, likeId, followerId
+      } = req.query;
+      let activities;
+
+      if (postId) activities = await getPostActivity({ postId });
+      else if (eventId) activities = await getEventActivity({ eventId });
+      else if (movieId) activities = await getMovieActivity({ movieId });
+      else if (commentId) activities = await getCommentActivity({ commentId });
+      else if (likeId) activities = await getLikeActivity({ likeId });
+      else if (followerId) activities = await getFolllowerActivity({ commentId });
+      else activities = await getActivitiesByKey({});
+
+      return successResponse(res, { message: 'Activity Gotten Successfully', activities });
+    } catch (error) {
+      console.error(error);
       errorResponse(res, { code: 500, message: error });
     }
   },

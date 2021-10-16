@@ -12,6 +12,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: true
     },
+    trailer: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
     releaseDate: {
       type: DataTypes.STRING,
       allowNull: true
@@ -103,6 +107,10 @@ module.exports = (sequelize, DataTypes) => {
     });
     Movie.hasMany(models.MovieMedia, {
       as: 'media',
+      foreignKey: 'movieId'
+    });
+    Movie.hasMany(models.Ticket, {
+      as: 'tickets',
       foreignKey: 'movieId'
     });
     Movie.belongsToMany(models.Cinema, {

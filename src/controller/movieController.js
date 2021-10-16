@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import { GeneralService, MovieService } from '../services';
+import { GeneralService, MovieService, UserService } from '../services';
 import { Toolbox, Helpers } from '../utils';
 import database from '../models';
 
@@ -16,6 +16,10 @@ const {
   allEntities,
   findMultipleByKey
 } = GeneralService;
+const {
+  getFollowData,
+  addAllActivities
+} = UserService;
 const {
   uploadAllImages,
   uploadAllVideos
@@ -47,53 +51,57 @@ const MovieController = {
     try {
       // return console.log(req.body);
       let mediaPayload;
-      let thumbnailMedia;
-      let media;
-      const { id } = req.tokenData;
+      let thumbnailUrl;
+      let media = req.body.mediaIds;
+      let body;
+      const { id, name } = req.tokenData;
       const postBody = req.body.post;
       const { cinemaIds, genreIds } = req.body;
       delete req.body.post;
       delete req.body.cinemaIds;
       delete req.body.genreIds;
-      if (req.files && req.files.length) {
-        let imageMediaPayload;
-        let videoMediaPayload;
-        const fullMediaPayload = req.files.map((item) => ({
-          type: item.mimetype.split('/')[0],
-          fileExtension: item.mimetype.split('/')[1],
-          userId: id,
-          fileName: item.originalname
-        }));
-        const imagePayload = req.files.filter((item) => item.mimetype.split('/')[0].toLowerCase() === 'image');
-        const videoPayload = req.files.filter((item) => item.mimetype.split('/')[0].toLowerCase() === 'video');
-        if (imagePayload.length > 0) {
-          const imageUrls = await uploadAllImages(imagePayload);
-          imageMediaPayload = mergeImageVideoUrls(fullMediaPayload, imageUrls);
-        }
-        if (videoPayload.length > 0) {
-          const videoUrls = await uploadAllVideos(videoPayload);
-          videoMediaPayload = mergeImageVideoUrls(fullMediaPayload, videoUrls);
-        }
-        mediaPayload = imageMediaPayload.concat(videoMediaPayload);
-        media = await Media.bulkCreate(mediaPayload);
-      } else if (req.body.mediaIds) {
-        if (req.body.thumbnailId) {
-          thumbnailMedia = req.body.mediaIds.unshift(req.body.thumbnailId);
-        }
-        media = req.body.mediaIds;
-      }
+      // if (req.files && req.files.length) {
+      //   let imageMediaPayload;
+      //   let videoMediaPayload;
+      //   const fullMediaPayload = req.files.map((item) => ({
+      //     type: item.mimetype.split('/')[0],
+      //     fileExtension: item.mimetype.split('/')[1],
+      //     userId: id,
+      //     fileName: item.originalname
+      //   }));
+      //   const imagePayload = req.files.filter((item) => item.mimetype.split('/')[0].toLowerCase() === 'image');
+      //   const videoPayload = req.files.filter((item) => item.mimetype.split('/')[0].toLowerCase() === 'video');
+      //   if (imagePayload.length > 0) {
+      //     const imageUrls = await uploadAllImages(imagePayload);
+      //     imageMediaPayload = mergeImageVideoUrls(fullMediaPayload, imageUrls);
+      //   }
+      //   if (videoPayload.length > 0) {
+      //     const videoUrls = await uploadAllVideos(videoPayload);
+      //     videoMediaPayload = mergeImageVideoUrls(fullMediaPayload, videoUrls);
+      //   }
+      //   mediaPayload = imageMediaPayload.concat(videoMediaPayload);
+      //   media = await Media.bulkCreate(mediaPayload);
+      // } else if (req.body.mediaIds) {
+      //   if (req.body.thumbnailId) {
+      //     thumbnailMedia = req.body.mediaIds.unshift(req.body.thumbnailId);
+      //   }
+      //   media = req.body.mediaIds;
+      // }
       if (!req.body.numberOfTickets) req.body.isAvialable = false;
       else if (req.body.numberOfTickets <= 0) req.body.isAvialable = false;
       else req.body.isAvialable = true;
       const mediaTrailer = await findByKey(Media, { url: req.body.trailer });
-      // return console.log(mediaTrailer);
-      const movie = await addEntity(Movie, { ...req.body, userId: id });
+      if (req.body.thumbnailId) thumbnailUrl = await findByKey(Media, { id: req.body.thumbnailId });
+      if (thumbnailUrl) body = { ...req.body, thumbnail: thumbnailUrl.url };
+      // return console.log(body);
+      const movie = await addEntity(Movie, { ...body, userId: id });
       const movieCinemaPayload = cinemaIds.map((item) => ({ movieId: movie.id, cinemaId: Number(item) }));
       await MovieCinema.bulkCreate(movieCinemaPayload);
       const movieGenrePayload = genreIds.map((item) => ({ movieId: movie.id, genreId: Number(item) }));
       await MovieGenre.bulkCreate(movieGenrePayload);
       const mediaMoviePayload = media.map((item) => ({ mediaId: Number(item), movieId: movie.id }));
       if (mediaTrailer) mediaMoviePayload.unshift({ mediaId: mediaTrailer.id, movieId: movie.id });
+      if (thumbnailUrl) mediaMoviePayload.unshift({ mediaId: req.body.thumbnailId, movieId: movie.id });
       const mediaMovie = await MovieMedia.bulkCreate(mediaMoviePayload);
       if (movie && mediaMovie) {
         if (postBody) {
@@ -104,8 +112,11 @@ const MovieController = {
           await updateByKey(Movie, { postId: post.id }, { id: movie.id });
         }
       }
+      // activities
+      const followData = await getFollowData({ id });
+      await addAllActivities(followData, `${name} added a new movie`, movie.id, 'movie', id);
       return successResponse(res, {
-        message: 'Post Added Successfully', movie, media, mediaMovie
+        message: 'Movie Added Successfully', movie, media, mediaMovie
       });
     } catch (error) {
       console.error(error);
