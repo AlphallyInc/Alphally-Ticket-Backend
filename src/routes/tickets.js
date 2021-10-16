@@ -12,7 +12,8 @@ const {
   validateMovieTicketPayload,
   validateEventTicketPayload,
   verifyTicket,
-  verifyIds
+  verifyIds,
+  verifyPersonalTickets
 } = TicketMiddleware;
 const {
   buyMovieTicket,
@@ -20,7 +21,8 @@ const {
   makeTicketPayment,
   verifyPayment,
   verificationCheck,
-  getAllTickets
+  getAllTickets,
+  getPersonalTickets
 } = TicketController;
 
 router.post('/movie', userBouncers, validateMovieTicketPayload, buyMovieTicket);
@@ -29,5 +31,6 @@ router.get('/verify', userBouncers, verifyTicket, verifyPayment); // ?ticketid=[
 router.get('/verification', userBouncers, verificationCheck); // ?ticketCode=[]
 router.post('/event', userBouncers, validateEventTicketPayload, buyEventTicket);
 router.get('/', adminBouncers, verifyIds, getAllTickets); // movieId=[] || eventId=[]
+router.get('/personal', userBouncers, verifyPersonalTickets, getPersonalTickets);
 
 export default router;

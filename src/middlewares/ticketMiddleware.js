@@ -139,6 +139,30 @@ const TicketMiddleware = {
       errorResponse(res, { code: 400, message: error });
     }
   },
+
+  /**
+   * middleware for validating tickets
+   * @async
+   * @param {object} req - the api request
+   * @param {object} res - api response returned by method
+   * @param {object} next - returned values going into next function
+   * @returns {object} - returns error or response object
+   * @memberof TicketMiddleware
+   */
+  async verifyPersonalTickets(req, res, next) {
+    try {
+      const { ticketId } = req.query;
+      if (ticketId) {
+        validateId({ id: ticketId });
+        const ticket = await findByKey(Ticket, { id: ticketId });
+        if (!ticket) return errorResponse(res, { code: '404', message: 'Ticket is invalid' });
+        req.ticket = ticket;
+      }
+      next();
+    } catch (error) {
+      errorResponse(res, { code: 400, message: error });
+    }
+  },
 };
 
 export default TicketMiddleware;

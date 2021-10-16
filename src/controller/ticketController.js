@@ -17,7 +17,8 @@ const {
 const {
   addEntity,
   updateByKey,
-  findByKey
+  findByKey,
+  findMultipleByKey
 } = GeneralService;
 const {
   getMedias,
@@ -257,6 +258,30 @@ const TicketController = {
       return successResponse(res, { message: 'Tickets Gotten Successfully', data });
     } catch (error) {
       console.error(error);
+      errorResponse(res, { code: 500, message: error });
+    }
+  },
+
+  /**
+   * get personal tickets
+   * @async
+   * @param {object} req
+   * @param {object} res
+   * @returns {JSON} a JSON response with user details and Token
+   * @memberof TicketController
+   */
+  async getPersonalTickets(req, res) {
+    try {
+      let tickets;
+      const { id } = req.tokenData;
+
+      if (req.query.ticketId) tickets = await findMultipleByKey(Ticket, { id: req.query.ticketId, userId: id });
+      else tickets = await findMultipleByKey(Ticket, { userId: id });
+
+      if (tickets.length < 1) return errorResponse(res, { code: 404, message: 'Tickets does not exist' });
+
+      return successResponse(res, { message: 'Tickets Gotten Successfully', tickets });
+    } catch (error) {
       errorResponse(res, { code: 500, message: error });
     }
   },
